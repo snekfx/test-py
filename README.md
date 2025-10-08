@@ -1,2 +1,2 @@
 # test-py
-enforce testing requirements
+enforce testing requirements for rust and python and ...?
