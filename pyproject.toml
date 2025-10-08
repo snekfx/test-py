@@ -1,14 +1,14 @@
 [project]
 name = "testrs"
 version = "0.1.0"
-description = "RSB test orchestrator for Rust projects"
+description = "Universal test orchestrator for multi-language projects (Rust, Python, Node.js, Shell)"
 authors = [
     {name = "snekfx", email = "noreply@snekfx.dev"}
 ]
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
-keywords = ["rust", "testing", "orchestration", "rsb", "cargo"]
+keywords = ["testing", "orchestration", "rust", "python", "nodejs", "shell", "rsb", "cargo", "pytest", "jest"]
 
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -24,7 +24,8 @@ classifiers = [
 ]
 
 dependencies = [
-    # Core dependencies
+    # TOML parsing (Python 3.11+ has tomllib built-in)
+    "tomli>=2.0.0; python_version<'3.11'",
 ]
 
 [project.optional-dependencies]
