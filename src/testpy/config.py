@@ -101,6 +101,8 @@ class Config:
                 "dummy_*",
                 "lib.rs",
                 "main.rs",
+                "deps.rs",     # Hub re-exports
+                "hub.rs",      # Hub utilities/massaging
             ]
         if not self.rust.runner_cmd:
             self.rust.runner_cmd = "cargo test"
