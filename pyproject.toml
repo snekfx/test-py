@@ -1,5 +1,5 @@
 [project]
-name = "testrs"
+name = "testpy"
 version = "0.1.0"
 description = "Universal test orchestrator for multi-language projects (Rust, Python, Node.js, Shell)"
 authors = [
@@ -35,7 +35,7 @@ dev = [
 ]
 
 [project.scripts]
-testrs = "testrs.cli:main"
+testpy = "testpy.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/snekfx/test-py"

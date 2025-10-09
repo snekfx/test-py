@@ -1,5 +1,5 @@
 """
-Output and display system for testrs.
+Output and display system for testpy.
 
 Provides boxy integration for pretty terminal output with graceful fallback.
 """
@@ -249,7 +249,7 @@ def print_error(message: str) -> None:
     Args:
         message: Error message
     """
-    print(f"testrs: {message}", file=sys.stderr)
+    print(f"testpy: {message}", file=sys.stderr)
 
 
 def print_debug(message: str) -> None:
@@ -259,5 +259,5 @@ def print_debug(message: str) -> None:
     Args:
         message: Debug message
     """
-    if os.getenv("TESTRS_DEBUG") == "1":
+    if os.getenv("TESTPY_DEBUG") == "1":
         print(f"[DEBUG] {message}", file=sys.stderr)

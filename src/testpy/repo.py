@@ -1,5 +1,5 @@
 """
-Repository detection and validation for testrs.
+Repository detection and validation for testpy.
 
 Detects project type, validates requirements, and provides repository context.
 """
@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
-from testrs.config import Config, create_default_config, load_config, validate_config
+from testpy.config import Config, create_default_config, load_config, validate_config
 
 
 @dataclass
@@ -143,7 +143,7 @@ def create_repo_context(start_path: Optional[Path] = None) -> RepoContext:
 
     if repo_root is None:
         raise RuntimeError(
-            "Not in a repository. testrs requires a git repository or project with manifest files."
+            "Not in a repository. testpy requires a git repository or project with manifest files."
         )
 
     # Load or create configuration

@@ -1,5 +1,5 @@
 """
-Configuration management for testrs.
+Configuration management for testpy.
 
 Loads and validates .spec.toml configuration files with multi-language support.
 Provides fallback chains: .spec.toml → language manifest → sensible defaults
@@ -46,7 +46,7 @@ class LanguageConfig:
 @dataclass
 class Config:
     """
-    Main configuration for testrs.
+    Main configuration for testpy.
 
     Loaded from .spec.toml with language-specific sections.
     """

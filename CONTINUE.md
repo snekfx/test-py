@@ -1,4 +1,4 @@
-# testrs - Session Continuation Guide
+# testpy - Session Continuation Guide
 
 **Session Date:** 2025-10-08
 **Version:** 0.1.0 (Development)
@@ -8,7 +8,7 @@
 
 ## 🎯 Quick Rehydration Summary
 
-**You are:** Continuing development of `testrs`, a universal test orchestrator for multi-language projects (Rust, Python, Node.js, Shell)
+**You are:** Continuing development of `testpy`, a universal test orchestrator for multi-language projects (Rust, Python, Node.js, Shell)
 
 **Current State:** Foundation complete, Rust support complete (100%)
 
@@ -24,7 +24,7 @@
 
 ## 📂 Project Context
 
-### What is testrs?
+### What is testpy?
 A Python-based universal test orchestrator that enforces test organization standards across multiple languages. It validates test structure, discovers modules, and runs tests with beautiful reporting.
 
 ### Key Features:
@@ -36,7 +36,7 @@ A Python-based universal test orchestrator that enforces test organization stand
 
 ### Architecture:
 ```
-src/testrs/
+src/testpy/
 ├── __init__.py       # Package initialization (46 LOC)
 ├── __main__.py       # Module entry point (29 LOC)
 ├── config.py         # Multi-language configuration (351 LOC)
@@ -64,11 +64,11 @@ All infrastructure in place:
 - Boxy integration with graceful fallback
 
 **Key Files:**
-- `src/testrs/__init__.py` - Package initialization
-- `src/testrs/config.py` - Config dataclasses with language-specific defaults
-- `src/testrs/repo.py` - RepoContext with language detection
-- `src/testrs/cli.py` - Argparse CLI with all commands defined
-- `src/testrs/output.py` - Boxy display functions
+- `src/testpy/__init__.py` - Package initialization
+- `src/testpy/config.py` - Config dataclasses with language-specific defaults
+- `src/testpy/repo.py` - RepoContext with language detection
+- `src/testpy/cli.py` - Argparse CLI with all commands defined
+- `src/testpy/output.py` - Boxy display functions
 
 **Commits:** ded55fb, 0225b20, c7c479a, ca664a4, 34ab544
 
@@ -188,11 +188,11 @@ All infrastructure in place:
    - BashFX testsh is architecture only
 
 4. **Current Implementation:**
-   - `src/testrs/discovery.py` - Module/test discovery (reference for Python/Node.js)
-   - `src/testrs/validator.py` - Validation logic (pattern for multi-language)
-   - `src/testrs/runner.py` - Test execution (template for Python/Node.js runners)
-   - `src/testrs/cli.py` - CLI commands (fully wired for Rust)
-   - `src/testrs/output.py` - Boxy display (use for reports)
+   - `src/testpy/discovery.py` - Module/test discovery (reference for Python/Node.js)
+   - `src/testpy/validator.py` - Validation logic (pattern for multi-language)
+   - `src/testpy/runner.py` - Test execution (template for Python/Node.js runners)
+   - `src/testpy/cli.py` - CLI commands (fully wired for Rust)
+   - `src/testpy/output.py` - Boxy display (use for reports)
 
 ### Testing Commands:
 
@@ -200,8 +200,8 @@ All infrastructure in place:
 # Test discovery on RSB
 cd /home/xnull/repos/code/rust/prods/oodx/rsb
 PYTHONPATH=/path/to/test-py/src python -c "
-from testrs.repo import create_repo_context
-from testrs.discovery import discover_rust_modules, discover_rust_tests
+from testpy.repo import create_repo_context
+from testpy.discovery import discover_rust_modules, discover_rust_tests
 ctx = create_repo_context()
 modules = discover_rust_modules(ctx.root, ctx.config)
 tests = discover_rust_tests(ctx.root, ctx.config)
@@ -211,8 +211,8 @@ print(f'Modules: {len(modules)}, Tests: {len(tests)}')
 # Test validation
 cd /home/xnull/repos/code/rust/prods/oodx/rsb
 PYTHONPATH=/path/to/test-py/src python -c "
-from testrs.repo import create_repo_context
-from testrs.validator import validate_rust_tests
+from testpy.repo import create_repo_context
+from testpy.validator import validate_rust_tests
 ctx = create_repo_context()
 violations = validate_rust_tests(ctx.root, ctx.config)
 print(f'Violations: {violations.total()}')
@@ -220,8 +220,8 @@ print(f'Violations: {violations.total()}')
 
 # Test CLI
 cd /home/xnull/repos/code/python/snekfx/test-py
-PYTHONPATH=src python -m testrs check
-PYTHONPATH=src python -m testrs --help
+PYTHONPATH=src python -m testpy check
+PYTHONPATH=src python -m testpy --help
 ```
 
 ---
@@ -275,7 +275,7 @@ PYTHONPATH=src python -m testrs --help
 ## 🧪 Testing Strategy
 
 ### M2 Testing Results (All Passing):
-- ✅ Run cargo test via testrs on RSB
+- ✅ Run cargo test via testpy on RSB
 - ✅ Timeout handling working (timeout/gtimeout detection)
 - ✅ Category filtering working
 - ✅ Module filtering working
@@ -285,7 +285,7 @@ PYTHONPATH=src python -m testrs --help
 - ✅ Boxy output formatting working perfectly
 
 ### M2 Validation Results:
-- ✅ testrs output matches RSB test.sh patterns
+- ✅ testpy output matches RSB test.sh patterns
 - ✅ Violation messages formatted correctly
 - ✅ Exit codes correct (0=pass, 1=violations, 2=test fail)
 
@@ -410,17 +410,17 @@ PYTHONPATH=src python -m testrs --help
 2. **Review TASKS.txt** - M2.4 and M2.5 requirements
 3. **Check canonical reference** - RSB test.sh lines mentioned above
 4. **Review existing code:**
-   - `src/testrs/discovery.py` - For patterns
-   - `src/testrs/validator.py` - To wire into CLI
-   - `src/testrs/cli.py` - Where to add handlers
+   - `src/testpy/discovery.py` - For patterns
+   - `src/testpy/validator.py` - To wire into CLI
+   - `src/testpy/cli.py` - Where to add handlers
 
 5. **Implement M2.4:**
-   - Create `src/testrs/runner.py`
+   - Create `src/testpy/runner.py`
    - Implement cargo test execution
    - Test on RSB project
 
 6. **Implement M2.5:**
-   - Update `src/testrs/cli.py`
+   - Update `src/testpy/cli.py`
    - Wire validation into lint/violations commands
    - Test output formatting
 
@@ -481,17 +481,17 @@ PYTHONPATH=src python -m testrs --help
 ```bash
 # Check your Rust project
 cd /path/to/your/rust/project
-testrs check
+testpy check
 
 # Validate test organization
-testrs lint                    # Summary
-testrs lint --violations       # Detailed report
+testpy lint                    # Summary
+testpy lint --violations       # Detailed report
 
 # Run tests (validates first)
-testrs run                     # All tests
-testrs run sanity              # Category filter
-testrs run --module math       # Module filter
-testrs run --override          # Skip validation
+testpy run                     # All tests
+testpy run sanity              # Category filter
+testpy run --module math       # Module filter
+testpy run --override          # Skip validation
 
 # Exit codes
 # 0 = Pass (no violations, tests pass)

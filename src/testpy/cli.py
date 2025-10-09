@@ -1,5 +1,5 @@
 """
-CLI interface for testrs.
+CLI interface for testpy.
 
 Command-line argument parsing and command routing.
 """
@@ -8,19 +8,19 @@ import argparse
 import sys
 from pathlib import Path
 
-from testrs import __version__
-from testrs.output import OutputMode, set_output_mode, print_error, info
+from testpy import __version__
+from testpy.output import OutputMode, set_output_mode, print_error, info
 
 
 def create_parser() -> argparse.ArgumentParser:
     """
-    Create argument parser for testrs CLI.
+    Create argument parser for testpy CLI.
 
     Returns:
         Configured ArgumentParser
     """
     parser = argparse.ArgumentParser(
-        prog="testrs",
+        prog="testpy",
         description="Universal test orchestrator for multi-language projects",
         epilog="For more information, see: https://github.com/snekfx/test-py",
     )
@@ -29,7 +29,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"testrs {__version__}",
+        version=f"testpy {__version__}",
     )
 
     # Global options
@@ -154,10 +154,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     Returns:
         Exit code (0=success, 1=violations, 2=test failures)
     """
-    from testrs.repo import create_repo_context
-    from testrs.validator import validate_rust_tests, format_violation_report
-    from testrs.runner import run_rust_tests
-    from testrs.output import warning, error, success, info
+    from testpy.repo import create_repo_context
+    from testpy.validator import validate_rust_tests, format_violation_report
+    from testpy.runner import run_rust_tests
+    from testpy.output import warning, error, success, info
 
     try:
         ctx = create_repo_context()
@@ -229,9 +229,9 @@ def cmd_lint(args: argparse.Namespace) -> int:
     Returns:
         Exit code (0=valid, 1=violations found)
     """
-    from testrs.repo import create_repo_context
-    from testrs.validator import validate_rust_tests, format_violation_report, get_violation_summary
-    from testrs.output import warning, success, info
+    from testpy.repo import create_repo_context
+    from testpy.validator import validate_rust_tests, format_violation_report, get_violation_summary
+    from testpy.output import warning, success, info
 
     try:
         ctx = create_repo_context()
@@ -264,7 +264,7 @@ def cmd_lint(args: argparse.Namespace) -> int:
                     f"• Missing category entries: {summary['missing_category_entries']}\n"
                     f"• Unauthorized root files: {summary['unauthorized_root']}\n"
                     f"• Invalid directories: {summary['invalid_directories']}\n\n"
-                    f"Run 'testrs lint --violations' for detailed report"
+                    f"Run 'testpy lint --violations' for detailed report"
                 )
                 warning(summary_text, "⚠ Validation Failed")
 
@@ -300,8 +300,8 @@ def cmd_check(args: argparse.Namespace) -> int:
     Returns:
         Exit code (0=valid, 127=errors)
     """
-    from testrs.repo import create_repo_context
-    from testrs.output import success, error
+    from testpy.repo import create_repo_context
+    from testpy.output import success, error
 
     try:
         ctx = create_repo_context()
@@ -346,7 +346,7 @@ def cmd_docs(args: argparse.Namespace) -> int:
 
 def main() -> int:
     """
-    Main entry point for testrs CLI.
+    Main entry point for testpy CLI.
 
     Returns:
         Exit code (0=success, non-zero=error)

@@ -1,5 +1,5 @@
 """
-Module and test discovery for testrs.
+Module and test discovery for testpy.
 
 Language-agnostic discovery with per-language implementations.
 """
@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
-from testrs.config import Config
+from testpy.config import Config
 
 
 @dataclass

@@ -1,4 +1,4 @@
-# testrs - Universal Test Orchestrator
+# testpy - Universal Test Orchestrator
 # Multi-Language Support: Rust, Python, Node.js/npm, Shell Scripts
 # Created: 2025-10-08
 
@@ -99,7 +99,7 @@ STORY: M1.1 - Core Project Structure [2 points] ✅ COMPLETE
   Description: Set up Python package structure with proper organization
 
   Tasks:
-    - Create src/testrs/ module structure
+    - Create src/testpy/ module structure
     - Set up __init__.py with version management
     - Create __main__.py for direct invocation
     - Update pyproject.toml with proper dependencies
@@ -110,8 +110,8 @@ STORY: M1.1 - Core Project Structure [2 points] ✅ COMPLETE
     - Proper package metadata
 
   Success Criteria:
-    ✓ Can import testrs as module
-    ✓ Can run via `python -m testrs`
+    ✓ Can import testpy as module
+    ✓ Can run via `python -m testpy`
     ✓ Version shows correctly from pyproject.toml
 
   Hints:
@@ -949,7 +949,7 @@ STORY: M5.4 - Documentation Command [3 points]
     - Support --view=data for plain output
 
   Requirements:
-    - Command: testrs docs [feature]
+    - Command: testpy docs [feature]
     - Display: MODULE_SPEC.md if no arg, feature doc if specified
     - Boxy: pretty display with "info" theme
     - Brain: fall back to brain registry if local not found
@@ -1021,7 +1021,7 @@ STORY: M5.6 - Error Handling & User Messages [3 points]
   Hints:
     - Try/except with specific exceptions
     - Error messages: avoid "Error: ", use friendly language
-    - Suggestions: "Run 'testrs init' to create .spec.toml"
+    - Suggestions: "Run 'testpy init' to create .spec.toml"
     - Stack traces: only in debug mode (--debug flag)
 
 ---
@@ -1037,19 +1037,19 @@ STORY: M6.1 - Deployment Script [3 points]
 
   Tasks:
     - Create bin/deploy.sh (similar to feat-py)
-    - Install to ~/.local/bin/snek/testrs
+    - Install to ~/.local/bin/snek/testpy
     - Inject version from pyproject.toml
     - Create symlinks if needed
     - Add to PATH instructions
 
   Requirements:
-    - Install location: ~/.local/bin/snek/testrs
+    - Install location: ~/.local/bin/snek/testpy
     - Version injection: read from pyproject.toml, inject into __version__
-    - Symlink: optional testrs symlink in ~/.local/bin/
+    - Symlink: optional testpy symlink in ~/.local/bin/
     - PATH: check if ~/.local/bin in PATH, warn if not
 
   Success Criteria:
-    ✓ Deploys testrs globally
+    ✓ Deploys testpy globally
     ✓ Version shows correctly
     ✓ Works from any directory
     ✓ PATH setup instructions clear
@@ -1088,22 +1088,22 @@ STORY: M6.2 - Init Command [3 points]
     - Template .spec.toml per language
     - Project name: from manifest or directory name
     - Tests root: tests/ (create if missing)
-    - Next steps: "Run 'testrs lint' to check test organization"
+    - Next steps: "Run 'testpy lint' to check test organization"
 
 ---
 
 STORY: M6.3 - Migration Guide [2 points]
-  Description: Guide for migrating RSB projects to testrs
+  Description: Guide for migrating RSB projects to testpy
 
   Tasks:
     - Write MIGRATION.md
-    - Document rsb test.sh → testrs migration
+    - Document rsb test.sh → testpy migration
     - Provide migration checklist
     - Show examples for each project type
 
   Requirements:
     - Cover: projects with existing test.sh
-    - Steps: install testrs, init config, validate tests
+    - Steps: install testpy, init config, validate tests
     - Checklist: pre-migration, migration, post-migration
     - Examples: RSB project, Python project, Node.js project
 
@@ -1145,16 +1145,16 @@ STORY: M6.4 - Comprehensive README [3 points]
   Hints:
     - Follow feat-py README structure
     - Show .spec.toml examples per language
-    - Command examples: testrs run sanity, testrs lint, etc.
+    - Command examples: testpy run sanity, testpy lint, etc.
     - Troubleshooting: "Tests not found", "Invalid config", etc.
 
 ---
 
-STORY: M6.5 - Test Coverage for testrs Itself [5 points]
-  Description: Test suite for testrs tool
+STORY: M6.5 - Test Coverage for testpy Itself [5 points]
+  Description: Test suite for testpy tool
 
   Tasks:
-    - Create tests/ for testrs itself
+    - Create tests/ for testpy itself
     - Unit tests for core modules
     - Integration tests for commands
     - Test against sample projects
@@ -1181,26 +1181,26 @@ STORY: M6.5 - Test Coverage for testrs Itself [5 points]
 ---
 
 STORY: M6.6 - RSB Project Rollout [5 points]
-  Description: Deploy testrs to all 23 RSB projects
+  Description: Deploy testpy to all 23 RSB projects
 
   Tasks:
-    - Install testrs globally
+    - Install testpy globally
     - Migrate oodx-rsb first (canonical)
     - Create .spec.toml for each project
     - Validate test structure for each
     - Update HANDOFF.md with progress
 
   Requirements:
-    - Install: testrs to ~/.local/bin/snek/
+    - Install: testpy to ~/.local/bin/snek/
     - Migrate: prioritize high-priority projects first
-    - Validate: run testrs lint on each project
+    - Validate: run testpy lint on each project
     - Fix: violations before finalizing
     - Document: update HANDOFF.md
 
   Success Criteria:
-    ✓ testrs deployed globally
+    ✓ testpy deployed globally
     ✓ All 23 projects have .spec.toml
-    ✓ All projects pass testrs lint
+    ✓ All projects pass testpy lint
     ✓ HANDOFF.md updated
 
   Hints:

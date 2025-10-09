@@ -1,4 +1,4 @@
-# testrs - RSB Test Orchestrator for Rust Projects
+# testpy - RSB Test Orchestrator for Rust Projects
 
 Universal Python-based test runner implementing RSB (Rebel String-Biased) test organization standards.
 
@@ -63,7 +63,7 @@ Create a universal, Python-based test orchestrator that:
 
 ```
 test-py/
-├── src/testrs/          # Python package (to be implemented)
+├── src/testpy/          # Python package (to be implemented)
 ├── bin/
 │   └── deploy.sh        # Deployment script
 ├── code_ref/            # Reference implementations (READ-ONLY)
@@ -88,38 +88,38 @@ pip install -e .
 
 # Or use directly with PYTHONPATH
 export PYTHONPATH=/home/xnull/repos/code/python/snekfx/test-py/src
-python -m testrs --help
+python -m testpy --help
 ```
 
 ## Usage
 
 ```bash
 # Check configuration
-testrs check
+testpy check
 
 # Validate test organization (lint)
-testrs lint                    # Show summary
-testrs lint --violations       # Show detailed report
+testpy lint                    # Show summary
+testpy lint --violations       # Show detailed report
 
 # Run tests (validates first, then runs cargo test)
-testrs run                     # Run all tests
-testrs run sanity              # Run sanity category
-testrs run --module math       # Run specific module
+testpy run                     # Run all tests
+testpy run sanity              # Run sanity category
+testpy run --module math       # Run specific module
 
 # Override validation (emergency bypass)
-testrs run --override          # Run despite violations
-testrs run --skip-enforcement  # Skip validation completely
+testpy run --override          # Run despite violations
+testpy run --skip-enforcement  # Skip validation completely
 
 # Options
-testrs --view=data             # Plain output (no boxy)
-testrs --timeout 300           # Custom timeout (seconds)
-testrs --help                  # Show all options
+testpy --view=data             # Plain output (no boxy)
+testpy --timeout 300           # Custom timeout (seconds)
+testpy --help                  # Show all options
 ```
 
 **Example Output:**
 
 ```bash
-$ testrs lint
+$ testpy lint
 ⚠ Validation Failed
 Found 4 test organization violation(s):
 
@@ -130,7 +130,7 @@ Found 4 test organization violation(s):
 • Unauthorized root files: 0
 • Invalid directories: 0
 
-Run 'testrs lint --violations' for detailed report
+Run 'testpy lint --violations' for detailed report
 ```
 
 ## Development
@@ -138,15 +138,15 @@ Run 'testrs lint --violations' for detailed report
 ### Architecture
 
 **Implemented Modules:**
-- `src/testrs/__init__.py` - Package initialization (46 LOC)
-- `src/testrs/__main__.py` - Module entry point (29 LOC)
-- `src/testrs/config.py` - Multi-language configuration (351 LOC)
-- `src/testrs/repo.py` - Repository detection (288 LOC)
-- `src/testrs/output.py` - Boxy integration (264 LOC)
-- `src/testrs/cli.py` - CLI interface (383 LOC)
-- `src/testrs/discovery.py` - Module/test discovery (307 LOC)
-- `src/testrs/validator.py` - Test validation (352 LOC)
-- `src/testrs/runner.py` - Test execution (220 LOC)
+- `src/testpy/__init__.py` - Package initialization (46 LOC)
+- `src/testpy/__main__.py` - Module entry point (29 LOC)
+- `src/testpy/config.py` - Multi-language configuration (351 LOC)
+- `src/testpy/repo.py` - Repository detection (288 LOC)
+- `src/testpy/output.py` - Boxy integration (264 LOC)
+- `src/testpy/cli.py` - CLI interface (383 LOC)
+- `src/testpy/discovery.py` - Module/test discovery (307 LOC)
+- `src/testpy/validator.py` - Test validation (352 LOC)
+- `src/testpy/runner.py` - Test execution (220 LOC)
 
 **Total:** ~2,240 lines of production Python
 
@@ -166,7 +166,7 @@ Run 'testrs lint --violations' for detailed report
 ```bash
 # Test on RSB project (canonical reference)
 cd /home/xnull/repos/code/rust/prods/oodx/rsb
-PYTHONPATH=/home/xnull/repos/code/python/snekfx/test-py/src python -m testrs lint
+PYTHONPATH=/home/xnull/repos/code/python/snekfx/test-py/src python -m testpy lint
 
 # Expected results:
 # - 24 modules discovered

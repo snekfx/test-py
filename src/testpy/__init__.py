@@ -1,5 +1,5 @@
 """
-testrs - Universal test orchestrator for multi-language projects
+testpy - Universal test orchestrator for multi-language projects
 
 A Python-based test orchestrator that enforces test organization standards
 across Rust, Python, Node.js, and shell script projects.
@@ -30,7 +30,7 @@ def get_version() -> str:
         Version string (e.g., "0.1.0")
     """
     try:
-        return importlib.metadata.version("testrs")
+        return importlib.metadata.version("testpy")
     except importlib.metadata.PackageNotFoundError:
         # Fallback during development
         return "0.1.0-dev"

@@ -1,5 +1,5 @@
 """
-Test organization validation for testrs.
+Test organization validation for testpy.
 
 Enforces RSB test organization standards with categorized violation reporting.
 """
@@ -8,8 +8,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List
 
-from testrs.config import Config
-from testrs.discovery import Module, TestFile, discover_rust_modules, discover_rust_tests
+from testpy.config import Config
+from testpy.discovery import Module, TestFile, discover_rust_modules, discover_rust_tests
 
 
 @dataclass
@@ -343,8 +343,8 @@ def format_violation_report(violations: Violations, repo_root: Path) -> str:
     lines.append(f"• Invalid directories: {summary['invalid_directories']}")
     lines.append("")
     lines.append("QUICK FIXES:")
-    lines.append("• Run 'testrs lint --violations' for detailed analysis")
-    lines.append("• Use 'testrs --override' for emergency bypass")
+    lines.append("• Run 'testpy lint --violations' for detailed analysis")
+    lines.append("• Use 'testpy --override' for emergency bypass")
     lines.append("• Follow naming pattern: <category>_<module>.rs")
     lines.append("• Create missing sanity tests for all modules")
 

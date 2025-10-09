@@ -1,5 +1,5 @@
 """
-Test execution runner for testrs.
+Test execution runner for testpy.
 
 Executes tests with timeout support and captures results.
 """

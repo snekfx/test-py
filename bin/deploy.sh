@@ -12,65 +12,52 @@ VERSION=$(grep -E "^version\s*=" "$ROOT_DIR/pyproject.toml" | head -1 | cut -d'"
 
 # Display deployment ceremony
 echo "╔════════════════════════════════════════════════╗"
-echo "║              TESTRS DEPLOYMENT                 ║"
+echo "║              TESTPY DEPLOYMENT                 ║"
 echo "╠════════════════════════════════════════════════╣"
 echo "║ Package: RSB Test Orchestrator                 ║"
 echo "║ Version: v$VERSION                             ║"
-echo "║ Target:  $TARGET_BIN_DIR/                      ║"
+echo "║ Method:  pip install -e                        ║"
 echo "╚════════════════════════════════════════════════╝"
 echo ""
 
-# Deploy testrs tool
-echo "🧪 Deploying testrs tool..."
-mkdir -p "$TARGET_BIN_DIR"
+# Deploy testpy via pip
+echo "🧪 Deploying testpy tool..."
 
-# TODO: Replace with actual main script path once created
-# TESTRS_SOURCE="$ROOT_DIR/src/testrs/main.py"
-# TESTRS_TARGET="$TARGET_BIN_DIR/testrs"
+# Check if already installed
+if pip show testpy >/dev/null 2>&1; then
+    echo "⚠️  testpy is already installed, uninstalling..."
+    pip uninstall -y testpy
+fi
 
-# For now, create a placeholder
-TESTRS_TARGET="$TARGET_BIN_DIR/testrs"
-
-cat > "$TESTRS_TARGET" <<'EOF'
-#!/usr/bin/env python3
-"""
-RSB Test Orchestrator
-"""
-import sys
-
-def main():
-    print("testrs v0.1.0 - RSB Test Orchestrator")
-    print("Implementation pending")
-    return 0
-
-if __name__ == "__main__":
-    sys.exit(main())
-EOF
-
-if ! chmod +x "$TESTRS_TARGET"; then
-    echo "❌ Failed to make testrs executable"
+# Install in editable mode
+echo "📦 Installing testpy in editable mode..."
+if ! pip install -e "$ROOT_DIR"; then
+    echo "❌ Failed to install testpy"
     exit 1
 fi
 
-echo "✅ testrs tool deployed to $TESTRS_TARGET"
+echo "✅ testpy installed successfully"
 
 # Test the deployment
-echo "🧪 Testing testrs deployment..."
-if command -v testrs >/dev/null 2>&1; then
-    echo "✅ testrs is available in PATH"
+echo "🧪 Testing testpy deployment..."
+if command -v testpy >/dev/null 2>&1; then
+    echo "✅ testpy is available in PATH"
+    testpy --version
 else
-    echo "⚠️  Warning: testrs not found in PATH (may need to restart shell)"
+    echo "⚠️  Warning: testpy not found in PATH (may need to restart shell)"
 fi
 
 echo ""
 echo "╔════════════════════════════════════════════════╗"
 echo "║          DEPLOYMENT SUCCESSFUL!                ║"
 echo "╚════════════════════════════════════════════════╝"
-echo "  Deployed: testrs v$VERSION                     "
-echo "  Location: $TESTRS_TARGET                       "
+echo "  Deployed: testpy v$VERSION                     "
+echo "  Method:   pip install -e (editable)            "
 echo ""
-echo "🧪 testrs test orchestration commands:"
-echo "   testrs run                  # Run test suite"
-echo "   testrs --help               # Full command reference"
+echo "🧪 testpy test orchestration commands:"
+echo "   testpy check                # Check configuration"
+echo "   testpy lint                 # Validate test organization"
+echo "   testpy run                  # Run test suite"
+echo "   testpy --help               # Full command reference"
 echo ""
 echo "🚀 Ready to orchestrate your RSB test workflows!"
