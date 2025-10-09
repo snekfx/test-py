@@ -34,6 +34,9 @@ class Violations:
     # Invalid directories: tests/foo/ is not a valid category
     invalid_directories: List[str] = field(default_factory=list)
 
+    # Missing hub integration tests: hub packages without integration tests
+    missing_hub_integration: List[str] = field(default_factory=list)
+
     def total(self) -> int:
         """Get total violation count."""
         return (
@@ -43,6 +46,7 @@ class Violations:
             + len(self.missing_category_entries)
             + len(self.unauthorized_root)
             + len(self.invalid_directories)
+            + len(self.missing_hub_integration)
         )
 
     def is_valid(self) -> bool:
@@ -186,6 +190,9 @@ def validate_rust_tests(repo_root: Path, config: Config) -> Violations:
                     str(subdir.relative_to(repo_root))
                 )
 
+    # Validation 6: Check for hub integration tests (optional)
+    violations.missing_hub_integration = validate_hub_integration_tests(repo_root)
+
     return violations
 
 
@@ -206,6 +213,7 @@ def get_violation_summary(violations: Violations) -> Dict[str, int]:
         "missing_category_entries": len(violations.missing_category_entries),
         "unauthorized_root": len(violations.unauthorized_root),
         "invalid_directories": len(violations.invalid_directories),
+        "missing_hub_integration": len(violations.missing_hub_integration),
         "total": violations.total(),
     }
 
@@ -330,6 +338,30 @@ def format_violation_report(violations: Violations, repo_root: Path) -> str:
         )
         lines.append("")
 
+    # Missing hub integration tests
+    if violations.missing_hub_integration:
+        lines.append(
+            f"🔌 MISSING HUB INTEGRATION TESTS ({len(violations.missing_hub_integration)} packages)"
+        )
+        lines.append("-" * 80)
+        lines.append("Issue: Hub packages missing integration tests")
+        lines.append("Pattern: tests/integration/hub_<package>.rs")
+        lines.append("Purpose: Lightweight sanity check that hub package is accessible")
+        lines.append("")
+        for i, package in enumerate(violations.missing_hub_integration, 1):
+            lines.append(f"  {i:3d}. {package}")
+            lines.append(f"       Expected: tests/integration/hub_{package}.rs")
+        lines.append("")
+        lines.append("Fix: Create hub integration tests for each package:")
+        lines.append("  // tests/integration/hub_chrono.rs")
+        lines.append("  #[test]")
+        lines.append("  fn hub_chrono_available() {")
+        lines.append("      use myproject::deps::chrono::Utc;")
+        lines.append("      let now = Utc::now();")
+        lines.append("      assert!(now.timestamp() > 0);")
+        lines.append("  }")
+        lines.append("")
+
     # Summary
     summary = get_violation_summary(violations)
     lines.append("VIOLATION SUMMARY & FIXES")
@@ -341,6 +373,7 @@ def format_violation_report(violations: Violations, repo_root: Path) -> str:
     lines.append(f"• Missing category entries: {summary['missing_category_entries']}")
     lines.append(f"• Unauthorized root files: {summary['unauthorized_root']}")
     lines.append(f"• Invalid directories: {summary['invalid_directories']}")
+    lines.append(f"• Missing hub integration tests: {summary['missing_hub_integration']}")
     lines.append("")
     lines.append("QUICK FIXES:")
     lines.append("• Run 'testpy lint --violations' for detailed analysis")
@@ -349,3 +382,100 @@ def format_violation_report(violations: Violations, repo_root: Path) -> str:
     lines.append("• Create missing sanity tests for all modules")
 
     return "\n".join(lines)
+
+
+def get_hub_packages() -> List[str]:
+    """
+    Get list of hub packages from blade cache.
+
+    Parses ~/.local/data/snek/blade/deps_cache.tsv to extract
+    packages from the hub repo (dependency reexports).
+
+    Returns:
+        List of hub package names (e.g., ["chrono", "serde", "regex"])
+        Empty list if blade cache not found or hub repo not detected
+    """
+    cache_file = Path.home() / ".local/data/snek/blade/deps_cache.tsv"
+
+    if not cache_file.exists():
+        return []  # Blade cache not generated yet
+
+    packages = []
+    hub_repo_id = None
+
+    try:
+        with open(cache_file, "r") as f:
+            for line in f:
+                parts = line.strip().split("\t")
+
+                if len(parts) < 2:
+                    continue
+
+                # Find hub repo line: has "hub" name and "Cargo.toml" in path
+                if parts[1] == "hub" and "Cargo.toml" in line:
+                    hub_repo_id = parts[0]
+                    continue
+
+                # If we found hub repo, collect its dependencies
+                if hub_repo_id and parts[0].startswith(hub_repo_id):
+                    # Dependency lines: <id> <repo_id> <package> <version> ...
+                    if len(parts) >= 3 and parts[0] != hub_repo_id:
+                        package_name = parts[2]
+                        packages.append(package_name)
+                    # Stop when we hit next repo (different prefix)
+                    elif not parts[0].startswith(hub_repo_id):
+                        break
+
+    except Exception:
+        # Silently fail - hub validation is optional
+        return []
+
+    return sorted(set(packages))
+
+
+def has_hub_usage(repo_root: Path) -> bool:
+    """
+    Check if repository uses hub (dependency reexports).
+
+    Args:
+        repo_root: Repository root directory
+
+    Returns:
+        True if repo has src/deps.rs (hub usage indicator)
+    """
+    deps_file = repo_root / "src" / "deps.rs"
+    return deps_file.exists()
+
+
+def validate_hub_integration_tests(repo_root: Path) -> List[str]:
+    """
+    Validate that hub packages have integration tests.
+
+    For projects using hub (dependency reexports), checks that each
+    hub package has a corresponding integration test file following
+    the pattern: tests/integration/hub_<package>.rs
+
+    Args:
+        repo_root: Repository root directory
+
+    Returns:
+        List of hub packages missing integration tests
+    """
+    # Skip if project doesn't use hub
+    if not has_hub_usage(repo_root):
+        return []
+
+    hub_packages = get_hub_packages()
+    if not hub_packages:
+        return []  # No hub packages found or blade cache unavailable
+
+    missing = []
+    integration_dir = repo_root / "tests" / "integration"
+
+    for package in hub_packages:
+        # Expected test file: tests/integration/hub_<package>.rs
+        test_file = integration_dir / f"hub_{package}.rs"
+        if not test_file.exists():
+            missing.append(package)
+
+    return missing

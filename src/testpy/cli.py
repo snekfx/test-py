@@ -141,6 +141,12 @@ def create_parser() -> argparse.ArgumentParser:
         help="Feature to display (shows MODULE_SPEC if not specified)",
     )
 
+    # checklist command (alias for docs checklist)
+    checklist_parser = subparsers.add_parser(
+        "checklist",
+        help="Display test organization checklist (alias for 'docs checklist')",
+    )
+
     return parser
 
 
@@ -167,14 +173,13 @@ def cmd_run(args: argparse.Namespace) -> int:
             violations = validate_rust_tests(ctx.root, ctx.config)
 
             if not violations.is_valid():
-                report = format_violation_report(violations, ctx.root)
-                warning(report, "⚠ Test Organization Violations")
-
                 if not args.override:
                     error(
-                        f"Found {violations.total()} test organization violation(s).\n\n"
-                        "Fix violations or use --override to run anyway.",
-                        title="✗ Validation Failed"
+                        f"Cannot run tests: repository has invalid test organization.\n\n"
+                        f"Found {violations.total()} violation(s) that must be fixed before tests can run.\n\n"
+                        f"Run 'testpy lint --violations' to see detailed violations report.\n"
+                        f"Or use 'testpy --override' to bypass enforcement (not recommended).",
+                        title="Test Organization Validation Failed"
                     )
                     return 1
                 else:
@@ -263,7 +268,8 @@ def cmd_lint(args: argparse.Namespace) -> int:
                     f"• Missing UAT tests: {summary['missing_uat']}\n"
                     f"• Missing category entries: {summary['missing_category_entries']}\n"
                     f"• Unauthorized root files: {summary['unauthorized_root']}\n"
-                    f"• Invalid directories: {summary['invalid_directories']}\n\n"
+                    f"• Invalid directories: {summary['invalid_directories']}\n"
+                    f"• Missing hub integration tests: {summary['missing_hub_integration']}\n\n"
                     f"Run 'testpy lint --violations' for detailed report"
                 )
                 warning(summary_text, "⚠ Validation Failed")
@@ -338,10 +344,80 @@ def cmd_docs(args: argparse.Namespace) -> int:
         args: Parsed command-line arguments
 
     Returns:
+        Exit code (0=success, 1=doc not found)
+    """
+    from pathlib import Path
+    from testpy.output import info, error
+
+    # Determine which doc to show
+    doc_name = getattr(args, 'feature', None) or None
+
+    # Map doc aliases to filenames
+    doc_map = {
+        'checklist': 'RUST_TEST_CHECKLIST.md',
+        'rust-org': 'RUST_TEST_ORGANIZATION.md',
+        'rust-lint': 'RUST_TEST_ORGANIZATION.md',
+        'rust-howto': 'RUST_TESTING_HOWTO.md',
+        'rust-ux': 'RUST_TESTING_UX.md',
+        'rust-boxy': 'RUST_BOXY_ROLO_USAGE.md',
+        'rust-tools': 'RUST_BOXY_ROLO_USAGE.md',
+    }
+
+    # Resolve doc path
+    if doc_name and doc_name in doc_map:
+        doc_file = doc_map[doc_name]
+    elif doc_name:
+        error(f"Unknown documentation: {doc_name}\n\nAvailable: " + ", ".join(doc_map.keys()))
+        return 1
+    else:
+        # Default: show available docs
+        info(
+            "Available documentation:\n\n"
+            "  checklist        - Test organization checklist\n"
+            "  rust-org         - Rust test organization standard\n"
+            "  rust-howto       - Rust testing how-to guide\n"
+            "  rust-ux          - Visual testing UX guide\n"
+            "  rust-boxy        - Boxy/Rolo usage guide\n\n"
+            "Usage: testpy docs <name>",
+            title="Documentation"
+        )
+        return 0
+
+    # Find doc file
+    docs_dir = Path(__file__).parent.parent.parent / 'docs' / 'rust'
+    doc_path = docs_dir / doc_file
+
+    if not doc_path.exists():
+        error(f"Documentation file not found: {doc_path}")
+        return 1
+
+    # Display doc content
+    try:
+        with open(doc_path, 'r') as f:
+            content = f.read()
+
+        info(content, title=f"Documentation: {doc_name or 'index'}")
+        return 0
+
+    except Exception as e:
+        error(f"Failed to read documentation: {e}")
+        return 1
+
+
+def cmd_checklist(args: argparse.Namespace) -> int:
+    """
+    Display test checklist (alias for docs checklist).
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
         Exit code (0=success)
     """
-    info("Documentation display not yet implemented\n\nComing in Milestone 5!")
-    return 127
+    # Create fake args object with feature='checklist'
+    import argparse
+    docs_args = argparse.Namespace(feature='checklist')
+    return cmd_docs(docs_args)
 
 
 def main() -> int:
@@ -373,6 +449,8 @@ def main() -> int:
         return cmd_check(args)
     elif command == "docs":
         return cmd_docs(args)
+    elif command == "checklist":
+        return cmd_checklist(args)
     else:
         parser.print_help()
         return 1
