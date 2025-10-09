@@ -71,9 +71,8 @@ MILESTONE 1: Foundation & Infrastructure [WEEKS 1-2] ✅ COMPLETE
 MILESTONE 2: Rust Support (Canonical Implementation) [WEEKS 3-4] ✅ COMPLETE
   Complete Rust testing support using RSB patterns
   Success: Can run and validate tests for RSB projects
-  Status: 28/31 points (90%) - 5/6 stories complete
-  Date Completed: 2025-10-08 (core features)
-  Remaining: M2.6 (Hub Integration Test Validation) - optional enhancement
+  Status: 31/31 points (100%) - All 6 stories complete
+  Date Completed: 2025-10-09 (including M2.6 hub validation)
 
 MILESTONE 3: Multi-Language Discovery & Validation [WEEKS 5-6]
   Module discovery and test validation for Python/Node.js/Shell
@@ -255,8 +254,8 @@ MILESTONE 1 TOTAL: 16 story points
 
 ================================================================================
 MILESTONE 2: RUST SUPPORT (CANONICAL IMPLEMENTATION) ✅ COMPLETE
-Status: 28/28 points (100%) - All 5 stories complete
-Date Completed: 2025-10-08
+Status: 31/31 points (100%) - All 6 stories complete
+Date Completed: 2025-10-09 (including M2.6 hub validation)
 ================================================================================
 
 STORY: M2.1 - Rust Module Discovery [5 points] ✅ COMPLETE
@@ -428,30 +427,32 @@ STORY: M2.5 - Rust Violation Reporting [5 points] ✅ COMPLETE
 
 ---
 
-STORY: M2.6 - Hub Integration Test Validation [3 points]
+STORY: M2.6 - Hub Integration Test Validation [3 points] ✅ COMPLETE
+  Commits: 6df0875, baa93ec, c39c272
+  Date Completed: 2025-10-09
   Description: Enforce integration tests for hub packages
 
   Tasks:
-    □ Implement get_hub_packages() function
+    ✓ Implement get_hub_packages() function
       - Parse blade cache: ~/.local/data/snek/blade/deps_cache.tsv
       - Extract hub repo dependencies (REPO_ID with name="hub")
       - Return list of package names
 
-    □ Implement has_hub_usage() function
+    ✓ Implement has_hub_usage() function
       - Check if repo uses hub (src/deps.rs exists)
       - Return boolean
 
-    □ Add validate_hub_integration_tests() to validator
+    ✓ Add validate_hub_integration_tests() to validator
       - For each hub package, check for tests/integration/hub_<package>.rs
       - Return list of missing hub integration tests
       - Add as 7th violation type: "missing_hub_integration"
 
-    □ Update violation reporting
+    ✓ Update violation reporting
       - Display missing hub integration tests
       - Format: "Hub package '<package>' missing integration test"
       - Expected: "tests/integration/hub_<package>.rs"
 
-    □ Update RUST_TEST_ORGANIZATION.md
+    ✓ Update RUST_TEST_CHECKLIST.md
       - Document hub integration test requirement
       - Explain pattern: hub_<package>.rs
       - Show example lightweight sanity test
