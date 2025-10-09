@@ -68,11 +68,12 @@ MILESTONE 1: Foundation & Infrastructure [WEEKS 1-2] ✅ COMPLETE
   Status: 16/16 points (100%) - All 5 stories complete
   Date Completed: 2025-10-08
 
-MILESTONE 2: Rust Support (Canonical Implementation) [WEEKS 3-4] 🚧 IN PROGRESS
+MILESTONE 2: Rust Support (Canonical Implementation) [WEEKS 3-4] ✅ COMPLETE
   Complete Rust testing support using RSB patterns
   Success: Can run and validate tests for RSB projects
-  Status: 18/28 points (64%) - 3/5 stories complete
-  Remaining: M2.4 (Test Runner), M2.5 (Violation Reporting Display)
+  Status: 28/31 points (90%) - 5/6 stories complete
+  Date Completed: 2025-10-08 (core features)
+  Remaining: M2.6 (Hub Integration Test Validation) - optional enhancement
 
 MILESTONE 3: Multi-Language Discovery & Validation [WEEKS 5-6]
   Module discovery and test validation for Python/Node.js/Shell
@@ -427,7 +428,63 @@ STORY: M2.5 - Rust Violation Reporting [5 points] ✅ COMPLETE
 
 ---
 
-MILESTONE 2 TOTAL: 28 story points
+STORY: M2.6 - Hub Integration Test Validation [3 points]
+  Description: Enforce integration tests for hub packages
+
+  Tasks:
+    □ Implement get_hub_packages() function
+      - Parse blade cache: ~/.local/data/snek/blade/deps_cache.tsv
+      - Extract hub repo dependencies (REPO_ID with name="hub")
+      - Return list of package names
+
+    □ Implement has_hub_usage() function
+      - Check if repo uses hub (src/deps.rs exists)
+      - Return boolean
+
+    □ Add validate_hub_integration_tests() to validator
+      - For each hub package, check for tests/integration/hub_<package>.rs
+      - Return list of missing hub integration tests
+      - Add as 7th violation type: "missing_hub_integration"
+
+    □ Update violation reporting
+      - Display missing hub integration tests
+      - Format: "Hub package '<package>' missing integration test"
+      - Expected: "tests/integration/hub_<package>.rs"
+
+    □ Update RUST_TEST_ORGANIZATION.md
+      - Document hub integration test requirement
+      - Explain pattern: hub_<package>.rs
+      - Show example lightweight sanity test
+
+  Requirements:
+    - Only validate if repo uses hub (src/deps.rs exists)
+    - Parse blade cache (fallback: skip if cache missing)
+    - Lightweight sanity tests (import + basic usage check)
+    - Non-blocking validation (warning, not error)
+
+  Acceptance Criteria:
+    - Detects hub usage via src/deps.rs
+    - Reads hub packages from blade cache
+    - Validates tests/integration/hub_*.rs exist
+    - Reports missing hub integration tests
+    - Documentation updated
+
+  Example Hub Integration Test:
+    ```rust
+    // tests/integration/hub_chrono.rs
+    #[test]
+    fn hub_chrono_available() {
+        use rsb::deps::chrono::Utc;
+        let now = Utc::now();
+        assert!(now.timestamp() > 0);
+    }
+    ```
+
+  Story Points: 3 (simple validation logic + docs)
+
+---
+
+MILESTONE 2 TOTAL: 31 story points (was 28 + 3 for M2.6)
 
 ================================================================================
 MILESTONE 3: MULTI-LANGUAGE DISCOVERY & VALIDATION
@@ -1456,12 +1513,12 @@ MILESTONE 6 TOTAL: 21 story points
 SUMMARY
 ================================================================================
 
-Total Story Points: 177 points (was 133 + 44 for M4)
+Total Story Points: 180 points (was 133 + 44 for M4 + 3 for M2.6)
 Estimated Timeline: 15 weeks (10-12 points per week)
 
 MILESTONE BREAKDOWN:
   M1: Foundation & Infrastructure           - 16 points (Weeks 1-2) ✅ COMPLETE
-  M2: Rust Support                          - 28 points (Weeks 3-4) ✅ COMPLETE
+  M2: Rust Support                          - 31 points (Weeks 3-4) ✅ COMPLETE (28/31, M2.6 optional)
   M3: Multi-Language Discovery & Validation - 28 points (Weeks 5-6)
   M4: Documentation & Testing UX            - 44 points (Weeks 7-8) 🆕
   M5: Test Execution Engine                 - 21 points (Weeks 9-10)
