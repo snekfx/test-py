@@ -152,10 +152,71 @@ def cmd_run(args: argparse.Namespace) -> int:
         args: Parsed command-line arguments
 
     Returns:
-        Exit code (0=success, 2=test failures)
+        Exit code (0=success, 1=violations, 2=test failures)
     """
-    info("Test runner not yet implemented\n\nComing in Milestone 2!")
-    return 127
+    from testrs.repo import create_repo_context
+    from testrs.validator import validate_rust_tests, format_violation_report
+    from testrs.runner import run_rust_tests
+    from testrs.output import warning, error, success, info
+
+    try:
+        ctx = create_repo_context()
+
+        # Validate test organization first (unless --skip-enforcement)
+        if not args.skip_enforcement:
+            violations = validate_rust_tests(ctx.root, ctx.config)
+
+            if not violations.is_valid():
+                report = format_violation_report(violations, ctx.root)
+                warning(report, "⚠ Test Organization Violations")
+
+                if not args.override:
+                    error(
+                        f"Found {violations.total()} test organization violation(s).\n\n"
+                        "Fix violations or use --override to run anyway.",
+                        title="✗ Validation Failed"
+                    )
+                    return 1
+                else:
+                    warning(
+                        "Running tests despite violations (--override mode)",
+                        title="⚠ Override Mode"
+                    )
+
+        # Run tests
+        timeout = args.timeout or ctx.config.rust.timeout
+        category = getattr(args, 'category', None)
+        module = getattr(args, 'module', None)
+
+        info(f"Running Rust tests... (timeout: {timeout}s)")
+
+        result = run_rust_tests(ctx.root, category, module, timeout)
+
+        if result.success:
+            success(
+                f"Tests passed!\n\n"
+                f"Passed: {result.passed}\n"
+                f"Failed: {result.failed}\n"
+                f"Ignored: {result.ignored}\n"
+                f"Duration: {result.duration:.2f}s",
+                title="✓ Test Results"
+            )
+            return 0
+        else:
+            error(
+                f"Tests failed!\n\n"
+                f"Passed: {result.passed}\n"
+                f"Failed: {result.failed}\n"
+                f"Ignored: {result.ignored}\n"
+                f"Duration: {result.duration:.2f}s\n\n"
+                f"Exit code: {result.exit_code}",
+                title="✗ Test Results"
+            )
+            return 2
+
+    except RuntimeError as e:
+        print_error(str(e))
+        return 127
 
 
 def cmd_lint(args: argparse.Namespace) -> int:
@@ -168,8 +229,50 @@ def cmd_lint(args: argparse.Namespace) -> int:
     Returns:
         Exit code (0=valid, 1=violations found)
     """
-    info("Linting not yet implemented\n\nComing in Milestone 2!")
-    return 127
+    from testrs.repo import create_repo_context
+    from testrs.validator import validate_rust_tests, format_violation_report, get_violation_summary
+    from testrs.output import warning, success, info
+
+    try:
+        ctx = create_repo_context()
+
+        # Validate test organization
+        violations = validate_rust_tests(ctx.root, ctx.config)
+
+        if violations.is_valid():
+            success(
+                f"No test organization violations found!\n\n"
+                f"Project: {ctx.config.project_name or ctx.root.name}\n"
+                f"Language: {ctx.primary_language}\n"
+                f"Test root: {ctx.config.test_root}",
+                title="✓ Validation Passed"
+            )
+            return 0
+        else:
+            # Show detailed report if --violations flag set
+            if getattr(args, 'violations', False):
+                report = format_violation_report(violations, ctx.root)
+                warning(report, "⚠ Test Organization Violations")
+            else:
+                # Show summary only
+                summary = get_violation_summary(violations)
+                summary_text = (
+                    f"Found {summary['total']} test organization violation(s):\n\n"
+                    f"• Naming issues: {summary['naming']}\n"
+                    f"• Missing sanity tests: {summary['missing_sanity']}\n"
+                    f"• Missing UAT tests: {summary['missing_uat']}\n"
+                    f"• Missing category entries: {summary['missing_category_entries']}\n"
+                    f"• Unauthorized root files: {summary['unauthorized_root']}\n"
+                    f"• Invalid directories: {summary['invalid_directories']}\n\n"
+                    f"Run 'testrs lint --violations' for detailed report"
+                )
+                warning(summary_text, "⚠ Validation Failed")
+
+            return 1
+
+    except RuntimeError as e:
+        print_error(str(e))
+        return 127
 
 
 def cmd_violations(args: argparse.Namespace) -> int:
