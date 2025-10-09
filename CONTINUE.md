@@ -2,7 +2,7 @@
 
 **Session Date:** 2025-10-08
 **Version:** 0.1.0 (Development)
-**Context:** End of Session - M1 Complete, M2 Partially Complete
+**Context:** M1 Complete, M2 Complete - Ready for M3
 
 ---
 
@@ -10,15 +10,15 @@
 
 **You are:** Continuing development of `testrs`, a universal test orchestrator for multi-language projects (Rust, Python, Node.js, Shell)
 
-**Current State:** Foundation complete, Rust support 64% done
+**Current State:** Foundation complete, Rust support complete (100%)
 
 **What Just Happened:**
 1. Completed all of Milestone 1 (Foundation - 16 points)
-2. Completed 3/5 stories in Milestone 2 (Rust Support - 18/28 points)
+2. Completed all of Milestone 2 (Rust Support - 28 points)
 3. Fixed all code quality issues from repairman review
 4. Updated documentation (TASKS.txt, CONTINUE.md)
 
-**Next Task:** Complete M2.4 (Rust Test Runner) and M2.5 (Violation Reporting)
+**Next Task:** Begin M3 (Multi-Language Discovery & Validation)
 
 ---
 
@@ -74,8 +74,9 @@ All infrastructure in place:
 
 ---
 
-### 🚧 Milestone 2: Rust Support [IN PROGRESS]
-**Status:** 18/28 points (64%) - 3/5 stories complete
+### ✅ Milestone 2: Rust Support [COMPLETE]
+**Status:** 28/28 points (100%) - All 5 stories complete
+**Date Completed:** 2025-10-08
 
 **✅ Completed:**
 
@@ -98,19 +99,18 @@ All infrastructure in place:
    - Format violation reports with fixes
    - Tested: 4 violations detected in RSB (deps, xcls missing tests)
 
-**❌ Remaining:**
-
-4. **M2.4: Rust Test Runner [5pts]** - NOT STARTED
-   - Execute cargo test with timeout wrapper
+4. **M2.4: Rust Test Runner [5pts]** - Commit: b1801b2
+   - Execute cargo test with timeout wrapper (timeout/gtimeout)
    - Support category/module filtering
    - Capture and parse test output
-   - Return structured test results
+   - Return structured TestResult dataclass
+   - Robust exception handling (timeout, command not found, general errors)
 
-5. **M2.5: Rust Violation Reporting [5pts]** - NOT STARTED
+5. **M2.5: Rust Violation Reporting [5pts]** - Commit: b1801b2
    - Wire validation into lint/violations CLI commands
    - Display formatted reports via boxy
    - Show override warnings when --override used
-   - Exit with proper codes (0=pass, 1=violations)
+   - Exit with proper codes (0=pass, 1=violations, 2=test fail)
 
 ---
 
@@ -125,15 +125,19 @@ All infrastructure in place:
 - Boxy integration with fallback working perfectly
 
 **Milestone 2 Implementation:**
-- Built discovery and validation modules (3 stories, 18 points)
+- Built complete Rust support (5 stories, 28 points)
 - Matches RSB test.sh patterns exactly
 - Tested against canonical reference (oodx-rsb)
 - All 6 violation types implemented
+- Full test execution with timeout support
+- Beautiful boxy-themed violation reports
 
 **Code Quality:**
-- Repairman review: Grade A+ (Excellent)
-- Fixed all 3 minor issues (code duplication, type hints)
-- Commit: 2b3126e (refactor)
+- Repairman review: Grade A- (Excellent)
+- Fixed Python 3.8 compatibility (Tuple type hints)
+- Added robust exception handling
+- Fixed timeout output decoding
+- Commit: b1801b2 (M2.4 + M2.5)
 
 **Documentation:**
 - Updated TASKS.txt with completion markers
@@ -141,27 +145,24 @@ All infrastructure in place:
 
 ### What's Next (Priority Order):
 
-1. **Implement M2.4: Rust Test Runner [5pts]**
-   - Create runner.py module
-   - Implement cargo test execution with timeout
-   - Add category/module filtering
-   - Parse cargo test output for results
+1. **Begin Milestone 3: Multi-Language Discovery & Validation [28pts]**
+   - M3.1: Python Module Discovery [5pts]
+   - M3.2: Python Test Discovery [5pts]
+   - M3.3: Python Test Validation [8pts]
+   - M3.4: Node.js Module Discovery [5pts]
+   - M3.5: Node.js Test Discovery [5pts]
 
-2. **Implement M2.5: Rust Violation Reporting [5pts]**
-   - Wire validator into cli.py commands
-   - Implement lint/violations command handlers
-   - Display reports via output.py boxy functions
-   - Add override warning display
+2. **Milestone 3 Goals:**
+   - Reuse patterns from Rust implementation
+   - Python: pytest patterns, package discovery
+   - Node.js: jest/mocha patterns, npm package.json
+   - Shell: executable script detection (if time permits)
 
-3. **Complete Milestone 2**
-   - Test against RSB project
-   - Fix any issues
-   - Commit and tag M2 completion
-
-4. **Begin Milestone 3: Multi-Language Discovery**
-   - Python discovery patterns (similar to Rust)
-   - Node.js discovery patterns
-   - Shell script discovery
+3. **After M3: Milestone 4 - Test Execution Engine**
+   - Multi-language runner orchestration
+   - Parallel test execution
+   - Result aggregation
+   - Unified reporting
 
 ---
 
@@ -170,8 +171,9 @@ All infrastructure in place:
 ### Essential Files to Review:
 
 1. **TASKS.txt** - Complete implementation roadmap
-   - M2.4 requirements: lines 357-384
-   - M2.5 requirements: lines 387-414
+   - M3.1 requirements: Python Module Discovery
+   - M3.2 requirements: Python Test Discovery
+   - M3.3 requirements: Python Test Validation
    - Success criteria and hints included
 
 2. **Canonical Reference:** `/home/xnull/repos/code/rust/prods/oodx/rsb/bin/test.sh`
@@ -186,9 +188,10 @@ All infrastructure in place:
    - BashFX testsh is architecture only
 
 4. **Current Implementation:**
-   - `src/testrs/discovery.py` - Module/test discovery (reuse patterns)
-   - `src/testrs/validator.py` - Validation logic (wire into CLI)
-   - `src/testrs/cli.py` - CLI commands (implement lint/violations)
+   - `src/testrs/discovery.py` - Module/test discovery (reference for Python/Node.js)
+   - `src/testrs/validator.py` - Validation logic (pattern for multi-language)
+   - `src/testrs/runner.py` - Test execution (template for Python/Node.js runners)
+   - `src/testrs/cli.py` - CLI commands (fully wired for Rust)
    - `src/testrs/output.py` - Boxy display (use for reports)
 
 ### Testing Commands:
@@ -223,113 +226,75 @@ PYTHONPATH=src python -m testrs --help
 
 ---
 
-## 💡 Implementation Hints for M2.4 and M2.5
+## 💡 Implementation Hints for M3 (Multi-Language Support)
 
-### M2.4: Rust Test Runner
+### M3.1: Python Module Discovery
 
-**Goal:** Execute cargo test with timeout and filtering
+**Goal:** Discover Python modules/packages from src/ directory
 
 **Approach:**
-```python
-# Create runner.py
-import subprocess
-from pathlib import Path
-from typing import Optional, List
-from dataclasses import dataclass
+- Pattern 1: `src/package_name/__init__.py` (standard package)
+- Pattern 2: `src/package_name/submodule/__init__.py` (nested packages)
+- Exclusion patterns: `_*`, `dev_*`, `test_*`, `__pycache__`
+- Reuse Module dataclass from discovery.py
 
-@dataclass
-class TestResult:
-    """Test execution result."""
-    passed: int
-    failed: int
-    ignored: int
-    total: int
-    duration: float
-    output: str
-    exit_code: int
-
-def run_cargo_test(
-    repo_root: Path,
-    category: Optional[str] = None,
-    module: Optional[str] = None,
-    timeout: int = 600
-) -> TestResult:
-    """Run cargo test with optional filtering."""
-    cmd = ["cargo", "test"]
-
-    # Add filtering
-    if category and module:
-        cmd.extend(["--test", f"{category}_{module}"])
-    elif category:
-        cmd.extend(["--test", f"{category}_*"])
-
-    # Run with timeout
-    try:
-        result = subprocess.run(
-            cmd,
-            cwd=repo_root,
-            capture_output=True,
-            timeout=timeout,
-            text=True
-        )
-        # Parse output...
-    except subprocess.TimeoutExpired:
-        # Handle timeout...
-```
-
-**Reference:** RSB test.sh lines 39-47 (ctest function)
+**Reference:** Follow Rust discovery pattern in discovery.py:discover_rust_modules
 
 ---
 
-### M2.5: Rust Violation Reporting
+### M3.2: Python Test Discovery
 
-**Goal:** Display validation reports in CLI
+**Goal:** Discover Python test files from tests/
 
-**Approach:**
-```python
-# In cli.py
-def cmd_lint(args):
-    """Lint command handler."""
-    from testrs.repo import create_repo_context
-    from testrs.validator import validate_rust_tests, format_violation_report
-    from testrs.output import warning, success
+**Patterns:**
+- Wrapper style: `tests/sanity_package.py`
+- Directory style: `tests/sanity/package.py`
+- Prefixed style: `tests/sanity/sanity_package.py`
+- Category entries: `tests/sanity.py`, `tests/uat.py`
 
-    ctx = create_repo_context()
-    violations = validate_rust_tests(ctx.root, ctx.config)
+**Reference:** Follow Rust test discovery pattern in discovery.py:discover_rust_tests
 
-    if violations.is_valid():
-        success("No violations found!")
-        return 0
-    else:
-        report = format_violation_report(violations, ctx.root)
-        warning(report, "Test Organization Violations")
-        return 1
+---
 
-def cmd_violations(args):
-    """Detailed violations report."""
-    # Same as lint but always show detailed report
-```
+### M3.3: Python Test Validation
 
-**Reference:** RSB test.sh lines 283-399 (violation reporting)
+**Goal:** Validate Python test organization
+
+**Same 6 violation types as Rust:**
+1. Naming violations
+2. Missing sanity tests
+3. Missing UAT tests
+4. Missing category entries
+5. Unauthorized root files
+6. Invalid directories
+
+**Reference:** Adapt validator.py:validate_rust_tests for Python patterns
 
 ---
 
 ## 🧪 Testing Strategy
 
-### Manual Testing Checklist:
-- [ ] Run cargo test via testrs on RSB
-- [ ] Test timeout handling (create hanging test)
-- [ ] Test category filtering (sanity only)
-- [ ] Test module filtering (specific module)
-- [ ] Test lint command on RSB
-- [ ] Test violations command with --violations flag
-- [ ] Test --override mode behavior
-- [ ] Verify boxy output formatting
+### M2 Testing Results (All Passing):
+- ✅ Run cargo test via testrs on RSB
+- ✅ Timeout handling working (timeout/gtimeout detection)
+- ✅ Category filtering working
+- ✅ Module filtering working
+- ✅ Lint command showing violations correctly
+- ✅ Violations command with detailed report
+- ✅ Override mode behavior verified
+- ✅ Boxy output formatting working perfectly
 
-### Validation:
-- [ ] Compare testrs output to rsb test.sh output
-- [ ] Ensure violation messages match
-- [ ] Verify exit codes (0=pass, 1=violations, 2=test fail)
+### M2 Validation Results:
+- ✅ testrs output matches RSB test.sh patterns
+- ✅ Violation messages formatted correctly
+- ✅ Exit codes correct (0=pass, 1=violations, 2=test fail)
+
+### M3 Testing Checklist:
+- [ ] Python module discovery on multi-package projects
+- [ ] Python test discovery with pytest patterns
+- [ ] Python validation against test organization rules
+- [ ] Node.js module discovery from package.json
+- [ ] Node.js test discovery with jest/mocha patterns
 
 ---
 
@@ -360,27 +325,49 @@ def cmd_violations(args):
 
 ---
 
-## 🎯 Success Criteria for M2 Completion
+## 🎯 Success Criteria for M2 Completion ✅ ALL MET
 
-### M2.4 Success:
-✓ Can run cargo test with timeout
-✓ Can filter by category (all sanity tests)
-✓ Can filter by module (all math tests)
-✓ Timeout kills hung tests properly
-✓ Returns structured test results
+### M2.4 Success: ✅ COMPLETE
+✅ Can run cargo test with timeout
+✅ Can filter by category (all sanity tests)
+✅ Can filter by module (all math tests)
+✅ Timeout kills hung tests properly
+✅ Returns structured test results
 
-### M2.5 Success:
-✓ lint command displays violations
-✓ violations command shows detailed report
-✓ Reports match RSB test.sh format
-✓ Boxy themes applied correctly
-✓ Exit codes correct (0=pass, 1=violations)
+### M2.5 Success: ✅ COMPLETE
+✅ lint command displays violations
+✅ violations command shows detailed report
+✅ Reports match RSB test.sh format
+✅ Boxy themes applied correctly
+✅ Exit codes correct (0=pass, 1=violations)
 
-### M2 Overall:
-✓ All 5 stories complete (28/28 points)
-✓ Tested against RSB project
-✓ Matches canonical reference behavior
-✓ Ready for M3 (multi-language support)
+### M2 Overall: ✅ COMPLETE
+✅ All 5 stories complete (28/28 points)
+✅ Tested against RSB project
+✅ Matches canonical reference behavior
+✅ Ready for M3 (multi-language support)
+
+---
+
+## 🎯 Success Criteria for M3 (Next Milestone)
+
+### M3.1 - Python Module Discovery [5pts]:
+- [ ] Discover packages from src/ (__init__.py pattern)
+- [ ] Handle nested packages correctly
+- [ ] Apply exclusion patterns (_*, dev_*, test_*)
+- [ ] Return Module dataclass with metadata
+
+### M3.2 - Python Test Discovery [5pts]:
+- [ ] Support all 3 test file patterns (wrapper, directory, prefixed)
+- [ ] Detect pytest test files correctly
+- [ ] Identify category entry files
+- [ ] Return TestFile dataclass with category/module
+
+### M3.3 - Python Test Validation [8pts]:
+- [ ] Validate all 6 violation types
+- [ ] Format violation reports for Python
+- [ ] Match output style with Rust validation
+- [ ] Handle Python-specific naming patterns
 
 ---
 
@@ -482,7 +469,7 @@ def cmd_violations(args):
 ---
 
 **Last Updated:** 2025-10-08
-**Session Status:** READY TO CONTINUE
-**Next Task:** M2.4 - Rust Test Runner [5 points]
+**Session Status:** M2 COMPLETE - READY FOR M3
+**Next Task:** M3.1 - Python Module Discovery [5 points]
 
-**Welcome back! Let's finish Milestone 2! 🚀**
+**Milestone 2 is complete! Ready to add multi-language support! 🚀**
