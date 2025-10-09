@@ -1,0 +1,1256 @@
+# testrs - Universal Test Orchestrator
+# Multi-Language Support: Rust, Python, Node.js/npm, Shell Scripts
+# Created: 2025-10-08
+
+================================================================================
+HIGH-LEVEL REQUIREMENTS
+================================================================================
+
+1. MULTI-LANGUAGE SUPPORT
+   - Rust: cargo test integration, Cargo.toml detection
+   - Python: pytest/unittest integration, pyproject.toml/setup.py detection
+   - Node.js: npm/jest integration, package.json detection
+   - Shell: Direct script execution, test discovery by convention
+
+2. UNIFIED TEST ORGANIZATION
+   - 9 test categories: sanity, smoke, unit, integration, e2e, uat, chaos, bench, regression
+   - Naming pattern: <category>_<module>.<ext> (e.g., sanity_math.rs, uat_api.py, smoke_routes.test.js)
+   - Required tests per module: sanity + UAT
+   - Category entry points: <category>.<ext> (e.g., smoke.rs, unit.py, integration.test.js)
+
+3. CONFIGURATION VIA .spec.toml
+   - Unified config shared with feat-py and other RSB tooling
+   - Language detection: languages = ["rust", "python", "nodejs", "shell"]
+   - Test discovery patterns per language
+   - Exclusion patterns per language
+   - Project-specific overrides
+
+4. TEST STRUCTURE VALIDATION
+   - Naming convention enforcement
+   - Required test detection (sanity + UAT per module)
+   - Category entry file validation
+   - Directory structure validation
+   - Module discovery (language-agnostic)
+
+5. TEST EXECUTION
+   - Language-specific test runners (cargo, pytest, npm test, bash)
+   - Timeout handling (prevent hangs)
+   - Parallel execution support
+   - Category-specific filtering
+   - Module-specific filtering
+
+6. REPORTING & OUTPUT
+   - Boxy integration for pretty terminal output
+   - Categorized violation reports
+   - Override/bypass modes for emergencies
+   - Plain output mode for CI/scripting (--view=data)
+   - Test results summary
+
+7. CROSS-PLATFORM SUPPORT
+   - Linux, macOS, Windows compatibility
+   - Path handling (pathlib)
+   - Process spawning (subprocess with proper timeout)
+   - Terminal detection (for boxy fallback)
+
+8. INTEGRATION
+   - feat-py integration for feature documentation
+   - MODULE_SPEC awareness (per-language specs)
+   - Brain registry potential (test coverage tracking)
+   - CI/CD friendly (exit codes, JSON output)
+
+================================================================================
+MILESTONE ROADMAP
+================================================================================
+
+MILESTONE 1: Foundation & Infrastructure [WEEKS 1-2] ✅ COMPLETE
+  Core architecture, configuration, repository detection
+  Success: Can detect projects and load config across all target languages
+  Status: 16/16 points (100%) - All 5 stories complete
+  Date Completed: 2025-10-08
+
+MILESTONE 2: Rust Support (Canonical Implementation) [WEEKS 3-4] 🚧 IN PROGRESS
+  Complete Rust testing support using RSB patterns
+  Success: Can run and validate tests for RSB projects
+  Status: 18/28 points (64%) - 3/5 stories complete
+  Remaining: M2.4 (Test Runner), M2.5 (Violation Reporting Display)
+
+MILESTONE 3: Multi-Language Discovery & Validation [WEEKS 5-6]
+  Module discovery and test validation for Python/Node.js/Shell
+  Success: Can discover modules and validate structure for all languages
+
+MILESTONE 4: Test Execution Engine [WEEKS 7-8]
+  Test runners for all languages with timeout and parallel support
+  Success: Can execute tests across all language ecosystems
+
+MILESTONE 5: Reporting & Polish [WEEKS 9-10]
+  Beautiful reporting, boxy integration, CI/CD optimizations
+  Success: Production-ready tool with comprehensive reporting
+
+MILESTONE 6: Deployment & Documentation [WEEKS 11-12]
+  Global deployment, migration guides, comprehensive docs
+  Success: Tool deployed globally, 23 Rust projects aligned
+
+================================================================================
+MILESTONE 1: FOUNDATION & INFRASTRUCTURE ✅ COMPLETE
+================================================================================
+
+STORY: M1.1 - Core Project Structure [2 points] ✅ COMPLETE
+  Commit: ded55fb
+  Description: Set up Python package structure with proper organization
+
+  Tasks:
+    - Create src/testrs/ module structure
+    - Set up __init__.py with version management
+    - Create __main__.py for direct invocation
+    - Update pyproject.toml with proper dependencies
+
+  Requirements:
+    - Python 3.8+ compatibility
+    - Minimal dependencies (no heavy frameworks)
+    - Proper package metadata
+
+  Success Criteria:
+    ✓ Can import testrs as module
+    ✓ Can run via `python -m testrs`
+    ✓ Version shows correctly from pyproject.toml
+
+  Hints:
+    - Reuse feat-py version extraction pattern
+    - Keep dependencies minimal (stdlib preferred)
+
+---
+
+STORY: M1.2 - Multi-Language Configuration System [5 points] ✅ COMPLETE
+  Commit: 0225b20
+  Description: Load and validate .spec.toml with multi-language support
+
+  Tasks:
+    - Create config.py with Config dataclass
+    - Define language-specific configuration schemas
+    - Implement fallback chains (spec → manifest → defaults)
+    - Add validation for language-specific requirements
+    - Support per-language test patterns and exclusions
+
+  Requirements:
+    - Unified .spec.toml format (shared with feat-py)
+    - Per-language sections: [rust], [python], [nodejs], [shell]
+    - Global settings: project_name, languages, test_root
+    - Language-specific: test_patterns, exclusions, runner_options
+
+  Success Criteria:
+    ✓ Can load .spec.toml with multi-language config
+    ✓ Falls back to Cargo.toml/pyproject.toml/package.json when needed
+    ✓ Validates language-specific requirements
+    ✓ Provides sensible defaults per language
+
+  Hints:
+    - Use tomllib (Python 3.11+) or tomli (fallback)
+    - Reuse feat-py config patterns
+    - Language detection: check manifest files
+    - Default test patterns: tests/**/*_test.rs, tests/**/*_test.py, etc.
+
+---
+
+STORY: M1.3 - Repository Detection (Multi-Language) [3 points] ✅ COMPLETE
+  Commit: c7c479a
+  Description: Detect project type and validate requirements
+
+  Tasks:
+    - Create repo.py with RepoContext class
+    - Detect language from manifest files
+    - Validate language-specific requirements
+    - Support multi-language projects (Rust+Python common)
+    - Walk up directory tree to find repo root
+
+  Requirements:
+    - Must find .git directory (repo root)
+    - Rust: requires Cargo.toml
+    - Python: requires pyproject.toml, setup.py, or setup.cfg
+    - Node.js: requires package.json
+    - Shell: requires tests/ directory by convention
+    - Multi-language: detect primary language by file count
+
+  Success Criteria:
+    ✓ Detects all 4 language types correctly
+    ✓ Handles multi-language projects (Rust+Python bindings)
+    ✓ Provides clear error messages for missing requirements
+    ✓ Works from any subdirectory in repo
+
+  Hints:
+    - Reuse feat-py RepoContext pattern
+    - Language detection: check for Cargo.toml, pyproject.toml, package.json
+    - Primary language: count files by extension (.rs vs .py vs .js)
+    - Support hybrid projects (e.g., PyO3 Rust+Python)
+
+---
+
+STORY: M1.4 - CLI Foundation [3 points] ✅ COMPLETE
+  Commit: ca664a4
+  Description: Create CLI interface with command routing
+
+  Tasks:
+    - Create cli.py with argparse setup
+    - Define commands: run, lint, violations, check, docs
+    - Add global options: --override, --skip-enforcement, --timeout
+    - Implement --view=data for plain output (CI-friendly)
+    - Set up command routing to handlers
+
+  Requirements:
+    - Commands: run [category] [module], lint, violations, check, docs
+    - Global flags: --override, --skip-enforcement, --timeout=SECS, --parallel
+    - Output modes: --view=data (plain), --view=pretty (boxy), --no-boxy
+    - Language filtering: --language=rust|python|nodejs|shell
+    - Exit codes: 0=success, 1=validation errors, 2=test failures
+
+  Success Criteria:
+    ✓ All commands defined with proper help text
+    ✓ Global options work across commands
+    ✓ Proper exit codes for different error types
+    ✓ Help text is clear and comprehensive
+
+  Hints:
+    - Use argparse subcommands
+    - Reuse boxy patterns from feat-py
+    - Exit codes: 0=pass, 1=validation fail, 2=test fail, 127=config error
+
+---
+
+STORY: M1.5 - Boxy Integration & Output System [3 points] ✅ COMPLETE
+  Commit: 34ab544
+  Description: Unified output system with boxy pretty-printing
+
+  Tasks:
+    - Create output.py with boxy integration
+    - Implement fallback for when boxy unavailable
+    - Add themed output functions (success, warning, error, info)
+    - Support --view=data plain output mode
+    - Handle REPOS_USE_BOXY environment variable
+
+  Requirements:
+    - Check boxy availability (shutil.which)
+    - Fallback to plain stderr output
+    - Themes: magic, success, warning, error, plain
+    - Plain mode for CI (--view=data or REPOS_USE_BOXY=1)
+    - Width control (--width=max|80|100)
+
+  Success Criteria:
+    ✓ Boxy displays pretty output when available
+    ✓ Gracefully falls back to plain output
+    ✓ --view=data disables boxy completely
+    ✓ All themes work correctly
+
+  Hints:
+    - Copy boxy_display pattern from feat-py
+    - subprocess.run with capture_output for boxy calls
+    - Fallback: print to stderr with [theme] prefix
+
+---
+
+MILESTONE 1 TOTAL: 16 story points
+
+================================================================================
+MILESTONE 2: RUST SUPPORT (CANONICAL IMPLEMENTATION) 🚧 IN PROGRESS
+================================================================================
+
+STORY: M2.1 - Rust Module Discovery [5 points] ✅ COMPLETE
+  Commit: f1f7fc4
+  Description: Discover Rust modules from src/ directory
+
+  Tasks:
+    - Create discovery.py with Rust-specific discovery
+    - Pattern 1: src/module.rs files (legacy, optional)
+    - Pattern 2: src/module/mod.rs files (MODULE_SPEC standard)
+    - Apply exclusion patterns (_*, dev_*, prelude*, lib, main)
+    - Detect module public API via pub keyword scan
+
+  Requirements:
+    - Scan src/ for module/mod.rs directories
+    - Support legacy src/module.rs files (with opt-in)
+    - Exclusions: _*, dev_*, prelude*, dummy_*, lib, main, macros, streamable, xcls
+    - Return module names with file paths
+    - Handle nested modules (src/pkg/module/mod.rs)
+
+  Success Criteria:
+    ✓ Discovers all non-excluded modules in RSB project
+    ✓ Handles both mod.rs and .rs patterns
+    ✓ Correctly applies exclusion patterns
+    ✓ Returns structured module data
+
+  Hints:
+    - Use pathlib.Path.glob for discovery
+    - Reuse exclusion logic from rsb test.sh
+    - Special case: 'dev' module is NOT excluded, only dev_*
+
+---
+
+STORY: M2.2 - Rust Test Discovery [5 points] ✅ COMPLETE
+  Commit: f1f7fc4 (implemented with M2.1)
+  Description: Discover Rust test files in tests/ directory
+
+  Tasks:
+    - Scan tests/*.rs for wrapper files
+    - Scan tests/<category>/*.rs for organized tests
+    - Parse test file naming: <category>_<module>.rs
+    - Map tests to modules
+    - Detect category entry files (sanity.rs, unit.rs, etc.)
+
+  Requirements:
+    - Valid categories: sanity, smoke, unit, integration, e2e, uat, chaos, bench, regression
+    - Naming: <category>_<module>.rs or <category>/<module>.rs
+    - Skip: _*, dev_* patterns
+    - Detect: category entry files (smoke.rs, unit.rs)
+    - Return: test name, category, module, file path
+
+  Success Criteria:
+    ✓ Discovers all test files in RSB test suite
+    ✓ Correctly parses category and module from filename
+    ✓ Maps tests to discovered modules
+    ✓ Identifies category entry files
+
+  Hints:
+    - Regex for parsing: ^(sanity|smoke|...)_([a-z_]+)\.rs$
+    - Support both wrapper style and directory style
+    - Category entries are just category name (no underscore)
+
+---
+
+STORY: M2.3 - Rust Test Validation [8 points] ✅ COMPLETE
+  Commit: e500965
+  Description: Validate Rust test organization against RSB rules
+
+  Tasks:
+    - Create validator.py with validation logic
+    - Check naming conventions (<category>_<module>.rs)
+    - Detect missing sanity tests per module
+    - Detect missing UAT tests per module
+    - Validate category entry files exist
+    - Check for unauthorized root test files
+    - Detect invalid test directories
+    - Categorize violations by type
+
+  Requirements:
+    - 6 violation types:
+      1. Naming violations (wrong pattern)
+      2. Missing sanity tests (no sanity_<module>.rs)
+      3. Missing UAT tests (no uat_<module>.rs)
+      4. Missing category entries (no smoke.rs, etc.)
+      5. Unauthorized root files (tests/foo.rs not matching pattern)
+      6. Invalid directories (tests/foo/ not a valid category)
+    - Support 3 test file locations:
+      - tests/<category>_<module>.rs (wrapper)
+      - tests/<category>/<module>.rs (directory)
+      - tests/<category>/<category>_<module>.rs (prefixed)
+
+  Success Criteria:
+    ✓ Detects all 6 violation types correctly
+    ✓ Supports all 3 test file location patterns
+    ✓ Returns categorized violations
+    ✓ Matches rsb test.sh validation logic exactly
+
+  Hints:
+    - Reference: rsb_test.sh validate_test_structure()
+    - Use discovery results to cross-reference modules
+    - Required: sanity + UAT for each discovered module
+    - Category entries: sanity.rs, smoke.rs, unit.rs, etc.
+
+---
+
+STORY: M2.4 - Rust Test Runner [5 points]
+  Description: Execute Rust tests via cargo with timeout
+
+  Tasks:
+    - Create runner.py with cargo test execution
+    - Implement timeout wrapper (like ctest in bash)
+    - Support category filtering (cargo test --test sanity_*)
+    - Support module filtering (cargo test --test *_math)
+    - Capture and parse cargo test output
+
+  Requirements:
+    - Run: cargo test with subprocess
+    - Timeout: configurable (default 600s), use timeout/gtimeout commands
+    - Filtering: --test flag for category/module
+    - Output: capture stdout/stderr
+    - Exit code: pass through cargo exit code
+
+  Success Criteria:
+    ✓ Can run cargo test with timeout
+    ✓ Can filter by category (all sanity tests)
+    ✓ Can filter by module (all math tests)
+    ✓ Timeout kills hung tests properly
+    ✓ Returns structured test results
+
+  Hints:
+    - subprocess.run with timeout parameter
+    - Fallback: use 'timeout' command if available
+    - cargo test --test <pattern> for filtering
+    - Parse output for test counts (passed, failed, ignored)
+
+---
+
+STORY: M2.5 - Rust Violation Reporting [5 points]
+  Description: Generate beautiful violation reports for Rust
+
+  Tasks:
+    - Create formatted violation reports by category
+    - Show file-level violations with line numbers
+    - Show module-level violations with suggestions
+    - Generate fix recommendations
+    - Display via boxy with warning theme
+
+  Requirements:
+    - Group by violation type
+    - Show counts per type
+    - List specific violations with context
+    - Provide actionable fix suggestions
+    - Display summary with quick fixes
+    - Support both pretty (boxy) and plain (--view=data) output
+
+  Success Criteria:
+    ✓ Matches rsb test.sh violation report format
+    ✓ Clear, actionable recommendations
+    ✓ Beautiful boxy display with warning theme
+    ✓ Plain text fallback for CI
+
+  Hints:
+    - Reference: rsb_test.sh lines 283-399 (violation report)
+    - Use boxy_display with "warning" theme
+    - Format: section header, list items, fix suggestions
+    - Summary box at end with counts and quick fixes
+
+---
+
+MILESTONE 2 TOTAL: 28 story points
+
+================================================================================
+MILESTONE 3: MULTI-LANGUAGE DISCOVERY & VALIDATION
+================================================================================
+
+STORY: M3.1 - Python Module Discovery [3 points]
+  Description: Discover Python modules from src/ or project root
+
+  Tasks:
+    - Scan for Python packages (dirs with __init__.py)
+    - Scan for standalone modules (*.py files)
+    - Apply Python-specific exclusions (__pycache__, *.pyc, _*, dev_*)
+    - Detect module public API via class/function scan
+
+  Requirements:
+    - Package pattern: src/<package>/__init__.py or <package>/__init__.py
+    - Module pattern: src/<module>.py or <module>.py
+    - Exclusions: __pycache__, *.pyc, _*, dev_*, test_*, conftest
+    - Return module names with paths
+
+  Success Criteria:
+    ✓ Discovers Python packages and modules
+    ✓ Handles both src/ layout and flat layout
+    ✓ Correctly excludes test files and caches
+    ✓ Returns structured module data
+
+  Hints:
+    - Check for __init__.py to identify packages
+    - Standalone modules: *.py in src/ or root (not tests/)
+    - Common pattern: src/<package>/ with __init__.py
+
+---
+
+STORY: M3.2 - Python Test Discovery [3 points]
+  Description: Discover Python tests (pytest/unittest patterns)
+
+  Tasks:
+    - Scan tests/ for test_*.py and *_test.py
+    - Parse category from filename: <category>_<module>_test.py
+    - Support pytest discovery patterns
+    - Map tests to modules
+    - Detect category entry files
+
+  Requirements:
+    - Patterns: test_*.py, *_test.py, <category>_<module>_test.py
+    - Categories: same 9 as Rust (sanity, smoke, unit, ...)
+    - Directory structure: tests/<category>/*.py
+    - Return: test name, category, module, file path
+
+  Success Criteria:
+    ✓ Discovers pytest-style test files
+    ✓ Parses category and module from filenames
+    ✓ Maps tests to Python modules
+    ✓ Handles pytest conventions
+
+  Hints:
+    - pytest patterns: test_*.py or *_test.py
+    - Category parsing: sanity_api_test.py → category=sanity, module=api
+    - Support tests/<category>/test_<module>.py structure
+
+---
+
+STORY: M3.3 - Python Test Validation [5 points]
+  Description: Validate Python test organization
+
+  Tasks:
+    - Adapt Rust validation logic for Python
+    - Check Python test naming conventions
+    - Detect missing sanity/UAT tests per module
+    - Validate category entry files
+    - Python-specific: check for conftest.py
+
+  Requirements:
+    - Naming: <category>_<module>_test.py or test_<category>_<module>.py
+    - Required: sanity + UAT per module
+    - Category entries: test_sanity.py, test_smoke.py, etc.
+    - Validate conftest.py presence for fixtures
+
+  Success Criteria:
+    ✓ Validates Python test organization
+    ✓ Detects missing required tests
+    ✓ Checks naming conventions
+    ✓ Returns categorized violations
+
+  Hints:
+    - Reuse validator.py, add PythonValidator class
+    - Adapt violation types for Python conventions
+    - pytest expects test_* or *_test.py
+
+---
+
+STORY: M3.4 - Node.js Module Discovery [3 points]
+  Description: Discover Node.js modules from src/ or lib/
+
+  Tasks:
+    - Scan for JavaScript/TypeScript modules
+    - Support both CommonJS and ES modules
+    - Apply Node.js exclusions (node_modules, dist, build)
+    - Detect module exports
+
+  Requirements:
+    - Patterns: src/**/*.js, src/**/*.ts, lib/**/*.js
+    - Module detection: module.exports or export keyword
+    - Exclusions: node_modules, dist, build, _*, dev_*
+    - Return module names with paths
+
+  Success Criteria:
+    ✓ Discovers JavaScript/TypeScript modules
+    ✓ Handles CommonJS and ES module syntax
+    ✓ Excludes build artifacts and node_modules
+    ✓ Returns structured module data
+
+  Hints:
+    - Check package.json for "type": "module" (ES modules)
+    - Scan for export/module.exports to identify modules
+    - Common layouts: src/, lib/, index.js
+
+---
+
+STORY: M3.5 - Node.js Test Discovery [3 points]
+  Description: Discover Node.js tests (jest/mocha patterns)
+
+  Tasks:
+    - Scan for *.test.js, *.spec.js patterns
+    - Parse category from filename
+    - Support test/ and __tests__/ directories
+    - Map tests to modules
+
+  Requirements:
+    - Patterns: *.test.js, *.spec.js, <category>.<module>.test.js
+    - Categories: same 9 categories
+    - Directories: test/, tests/, __tests__/
+    - Return: test name, category, module, file path
+
+  Success Criteria:
+    ✓ Discovers jest/mocha style tests
+    ✓ Parses category and module from filenames
+    ✓ Maps tests to Node.js modules
+    ✓ Handles both test/ and __tests__/ conventions
+
+  Hints:
+    - jest patterns: *.test.js, *.spec.js
+    - Category parsing: sanity.api.test.js → category=sanity, module=api
+    - Support __tests__/<module>/<category>.test.js
+
+---
+
+STORY: M3.6 - Node.js Test Validation [5 points]
+  Description: Validate Node.js test organization
+
+  Tasks:
+    - Adapt validation logic for Node.js
+    - Check Node.js test naming conventions
+    - Detect missing sanity/UAT tests per module
+    - Validate jest/mocha configuration
+
+  Requirements:
+    - Naming: <category>.<module>.test.js or <module>.<category>.spec.js
+    - Required: sanity + UAT per module
+    - Category entries: sanity.test.js, smoke.test.js
+    - Validate test framework config (jest.config.js, .mocharc.js)
+
+  Success Criteria:
+    ✓ Validates Node.js test organization
+    ✓ Detects missing required tests
+    ✓ Checks naming conventions
+    ✓ Returns categorized violations
+
+  Hints:
+    - Reuse validator.py, add NodeValidator class
+    - jest/mocha have different conventions
+    - Check package.json for test framework
+
+---
+
+STORY: M3.7 - Shell Script Discovery [3 points]
+  Description: Discover shell scripts and test scripts
+
+  Tasks:
+    - Scan for *.sh scripts in src/, bin/, scripts/
+    - Scan for test scripts in tests/
+    - Parse category from test script names
+    - Validate shebang and executable bit
+
+  Requirements:
+    - Script patterns: src/**/*.sh, bin/**/*.sh, scripts/**/*.sh
+    - Test patterns: tests/<category>_<module>.sh
+    - Validate shebang: #!/bin/bash or #!/bin/sh
+    - Check executable bit (stat)
+
+  Success Criteria:
+    ✓ Discovers shell scripts by location
+    ✓ Identifies executable test scripts
+    ✓ Parses category from test names
+    ✓ Validates shebang presence
+
+  Hints:
+    - Use pathlib for executable check: path.stat().st_mode
+    - Shebang: read first line, check for #!
+    - Common locations: bin/, scripts/, tests/sh/
+
+---
+
+STORY: M3.8 - Shell Script Validation [3 points]
+  Description: Validate shell test organization
+
+  Tasks:
+    - Check shell test naming conventions
+    - Detect missing sanity/UAT test scripts
+    - Validate executable permissions
+    - Check for proper shebangs
+
+  Requirements:
+    - Naming: <category>_<module>.sh
+    - Required: sanity + UAT per script module
+    - Executable: chmod +x
+    - Shebang: #!/bin/bash (preferred) or #!/bin/sh
+
+  Success Criteria:
+    ✓ Validates shell test organization
+    ✓ Checks executable permissions
+    ✓ Validates shebangs
+    ✓ Returns categorized violations
+
+  Hints:
+    - Check os.access(path, os.X_OK) for executable
+    - Shebang check: open file, read first line
+    - Shell tests often in tests/sh/ subdirectory
+
+---
+
+MILESTONE 3 TOTAL: 28 story points
+
+================================================================================
+MILESTONE 4: TEST EXECUTION ENGINE
+================================================================================
+
+STORY: M4.1 - Python Test Runner [3 points]
+  Description: Execute Python tests via pytest/unittest
+
+  Tasks:
+    - Detect test framework (pytest vs unittest)
+    - Run pytest with proper arguments
+    - Support category/module filtering
+    - Capture and parse output
+    - Implement timeout
+
+  Requirements:
+    - Auto-detect: pytest if available, else unittest
+    - Timeout: configurable (default 600s)
+    - Filtering: -k flag for pytest, pattern for unittest
+    - Output: capture and parse results
+    - Exit code: pass through test framework exit code
+
+  Success Criteria:
+    ✓ Runs pytest tests correctly
+    ✓ Falls back to unittest if needed
+    ✓ Filters by category and module
+    ✓ Timeout works properly
+    ✓ Returns structured results
+
+  Hints:
+    - Check for pytest: shutil.which("pytest")
+    - pytest command: pytest tests/<category>/ -v
+    - unittest: python -m unittest discover
+    - Parse pytest output for test counts
+
+---
+
+STORY: M4.2 - Node.js Test Runner [3 points]
+  Description: Execute Node.js tests via npm/jest/mocha
+
+  Tasks:
+    - Detect test framework from package.json
+    - Run npm test or framework directly
+    - Support category/module filtering
+    - Capture and parse output
+    - Implement timeout
+
+  Requirements:
+    - Detect: check package.json "scripts": {"test": ...}
+    - Frameworks: jest, mocha, tap, ava
+    - Timeout: configurable
+    - Filtering: framework-specific (jest -t, mocha --grep)
+    - Exit code: pass through
+
+  Success Criteria:
+    ✓ Runs npm test correctly
+    ✓ Supports jest and mocha filtering
+    ✓ Timeout works properly
+    ✓ Returns structured results
+
+  Hints:
+    - Check package.json for test script
+    - jest filtering: jest --testNamePattern=<category>
+    - mocha filtering: mocha --grep <pattern>
+    - Parse framework-specific output
+
+---
+
+STORY: M4.3 - Shell Test Runner [2 points]
+  Description: Execute shell test scripts directly
+
+  Tasks:
+    - Run shell scripts with subprocess
+    - Capture stdout/stderr
+    - Implement timeout
+    - Support category/module filtering
+
+  Requirements:
+    - Execute: bash <script> or ./<script>
+    - Timeout: configurable
+    - Filtering: by filename pattern
+    - Exit code: 0=pass, non-zero=fail
+
+  Success Criteria:
+    ✓ Runs shell test scripts
+    ✓ Captures output correctly
+    ✓ Timeout works
+    ✓ Exit codes propagate correctly
+
+  Hints:
+    - Use subprocess.run with shell=False
+    - Pass script path directly: ["/bin/bash", script_path]
+    - Check executable bit before running
+    - Timeout via timeout parameter
+
+---
+
+STORY: M4.4 - Parallel Test Execution [5 points]
+  Description: Run tests in parallel across categories/modules
+
+  Tasks:
+    - Implement parallel test runner
+    - Use multiprocessing or concurrent.futures
+    - Support --parallel flag with worker count
+    - Aggregate results from parallel runs
+    - Handle failures and timeouts gracefully
+
+  Requirements:
+    - Parallel modes: by category, by module, by file
+    - Worker pool: configurable size (default: CPU count)
+    - Collect results: aggregate pass/fail counts
+    - Timeout: per-test timeout, not global
+    - Graceful shutdown on Ctrl+C
+
+  Success Criteria:
+    ✓ Runs tests in parallel correctly
+    ✓ Aggregates results properly
+    ✓ Handles timeouts per-test
+    ✓ Faster than sequential for large suites
+    ✓ Ctrl+C stops cleanly
+
+  Hints:
+    - Use concurrent.futures.ProcessPoolExecutor
+    - Each worker runs one category or module
+    - Aggregate results via futures.as_completed()
+    - Timeout: per-worker timeout, not pool timeout
+
+---
+
+STORY: M4.5 - Test Result Parsing [5 points]
+  Description: Parse test output from all frameworks
+
+  Tasks:
+    - Parse cargo test output (Rust)
+    - Parse pytest output (Python)
+    - Parse jest/mocha output (Node.js)
+    - Parse shell script exit codes
+    - Normalize results to common format
+
+  Requirements:
+    - Extract: test count, passed, failed, ignored, time
+    - Handle: various output formats (TAP, JUnit, custom)
+    - Normalize: TestResult dataclass with standard fields
+    - Errors: capture and categorize (compile, runtime, timeout)
+
+  Success Criteria:
+    ✓ Parses all 4 language test outputs
+    ✓ Normalizes to common TestResult format
+    ✓ Extracts counts and timing info
+    ✓ Categorizes errors properly
+
+  Hints:
+    - cargo test: look for "test result: ok. 10 passed; 0 failed"
+    - pytest: look for "== 10 passed in 1.23s =="
+    - jest: look for "Tests: 10 passed, 10 total"
+    - Regex patterns for each framework
+
+---
+
+STORY: M4.6 - Timeout & Hang Prevention [3 points]
+  Description: Robust timeout handling to prevent test hangs
+
+  Tasks:
+    - Implement per-test timeout
+    - Detect hung processes (no output for N seconds)
+    - Kill timeout processes cleanly
+    - Report timeout violations
+
+  Requirements:
+    - Timeout: configurable per-test (default 600s)
+    - Hung detection: no output for 60s (configurable)
+    - Kill: SIGTERM first, SIGKILL after grace period
+    - Report: which test timed out, how long it ran
+
+  Success Criteria:
+    ✓ Kills tests that exceed timeout
+    ✓ Reports timeout violations clearly
+    ✓ Doesn't leave zombie processes
+    ✓ Works across all language runners
+
+  Hints:
+    - subprocess.run with timeout parameter
+    - Catch TimeoutExpired exception
+    - Use psutil for reliable process termination
+    - Grace period: 5s between SIGTERM and SIGKILL
+
+---
+
+MILESTONE 4 TOTAL: 21 story points
+
+================================================================================
+MILESTONE 5: REPORTING & POLISH
+================================================================================
+
+STORY: M5.1 - Test Results Dashboard [5 points]
+  Description: Beautiful test results summary display
+
+  Tasks:
+    - Create results dashboard with boxy
+    - Show per-category results
+    - Show per-module results
+    - Show timing information
+    - Highlight failures prominently
+
+  Requirements:
+    - Display: category breakdown, module breakdown, timing
+    - Colors: green=pass, red=fail, yellow=ignored, gray=skipped
+    - Boxy themes: success (all pass), warning (some fail), error (all fail)
+    - Summary: total tests, passed, failed, ignored, time
+
+  Success Criteria:
+    ✓ Beautiful boxy display of results
+    ✓ Clear pass/fail indicators
+    ✓ Shows timing info
+    ✓ Plain fallback for CI
+
+  Hints:
+    - Use boxy with "success", "warning", or "error" theme
+    - Format: table with category/module rows, pass/fail columns
+    - Summary box at end with totals
+
+---
+
+STORY: M5.2 - Violation Report Enhancement [3 points]
+  Description: Enhanced violation reports with fix suggestions
+
+  Tasks:
+    - Add per-language violation reports
+    - Show code snippets for violations
+    - Generate auto-fix commands
+    - Link to documentation for fixes
+
+  Requirements:
+    - Show: file path, line number, violation type, suggestion
+    - Auto-fix: generate commands to fix naming, create stubs
+    - Docs: link to MODULE_SPEC, naming conventions
+    - Support: all 4 languages
+
+  Success Criteria:
+    ✓ Clear violation reports per language
+    ✓ Actionable fix suggestions
+    ✓ Auto-fix commands when possible
+    ✓ Links to relevant docs
+
+  Hints:
+    - Format: file:line - violation - suggestion
+    - Auto-fix: "mv tests/foo.rs tests/sanity_foo.rs"
+    - Docs links: "See: docs/ref/rsb/MODULE_SPEC.md"
+
+---
+
+STORY: M5.3 - CI/CD Optimizations [3 points]
+  Description: Optimize for CI/CD pipeline usage
+
+  Tasks:
+    - Add --view=data for plain output (no boxy)
+    - Add --quiet mode for minimal output
+    - Add --json output format
+    - Optimize exit codes for CI
+    - Add --fail-fast mode
+
+  Requirements:
+    - --view=data: plain text, no colors, no boxy
+    - --quiet: only show failures and summary
+    - --json: structured JSON output for parsing
+    - Exit codes: 0=pass, 1=validation fail, 2=test fail, 127=error
+    - --fail-fast: stop on first failure
+
+  Success Criteria:
+    ✓ Plain output works in CI
+    ✓ JSON output is parseable
+    ✓ Exit codes are reliable
+    ✓ --fail-fast stops quickly
+
+  Hints:
+    - --view=data: disable all boxy, no ANSI colors
+    - --json: use json.dumps for results
+    - Exit codes: return early on first failure for --fail-fast
+    - CI detection: check for CI env var
+
+---
+
+STORY: M5.4 - Documentation Command [3 points]
+  Description: Integrate docs command like rsb test.sh
+
+  Tasks:
+    - Add 'docs' command to CLI
+    - Display MODULE_SPEC from docs/ref/rsb/
+    - Display feature docs from docs/feats/
+    - Integrate with feat-py brain registry
+    - Support --view=data for plain output
+
+  Requirements:
+    - Command: testrs docs [feature]
+    - Display: MODULE_SPEC.md if no arg, feature doc if specified
+    - Boxy: pretty display with "info" theme
+    - Brain: fall back to brain registry if local not found
+
+  Success Criteria:
+    ✓ Can display MODULE_SPEC
+    ✓ Can display feature docs
+    ✓ Integrates with feat-py brain
+    ✓ Pretty boxy display
+
+  Hints:
+    - Reuse feat-py docs command pattern
+    - Check local first: docs/ref/rsb/MODULE_SPEC.md
+    - Fall back to brain: ~/repos/docs/brain/dev/proj/feat/<project>/
+    - Use boxy "info" theme
+
+---
+
+STORY: M5.5 - Override & Bypass Modes [2 points]
+  Description: Emergency bypass for validation enforcement
+
+  Tasks:
+    - Implement --override flag
+    - Show warning when override active
+    - Skip validation in override mode
+    - Log override usage for audit
+
+  Requirements:
+    - --override: skip all validation, run tests anyway
+    - Warning: big red warning via boxy when override active
+    - Log: record when override used (for audit)
+    - Still report violations, but don't block
+
+  Success Criteria:
+    ✓ Override bypasses validation
+    ✓ Clear warning displayed
+    ✓ Violations still reported
+    ✓ Tests run despite violations
+
+  Hints:
+    - Check --override flag in validator
+    - Show warning via boxy "warning" theme
+    - Log to stderr: "WARNING: Running in override mode"
+    - Still call validate, but ignore result
+
+---
+
+STORY: M5.6 - Error Handling & User Messages [3 points]
+  Description: Comprehensive error handling with helpful messages
+
+  Tasks:
+    - Add error handling for all failure modes
+    - Provide helpful error messages
+    - Suggest fixes for common errors
+    - Handle edge cases gracefully
+
+  Requirements:
+    - Errors: config not found, invalid language, no tests found, etc.
+    - Messages: clear, actionable, not technical jargon
+    - Suggestions: "Did you mean...?", "Try running..."
+    - Exit codes: appropriate for error type
+
+  Success Criteria:
+    ✓ All error paths have clear messages
+    ✓ Suggestions are helpful
+    ✓ No stack traces for user errors
+    ✓ Exit codes match error type
+
+  Hints:
+    - Try/except with specific exceptions
+    - Error messages: avoid "Error: ", use friendly language
+    - Suggestions: "Run 'testrs init' to create .spec.toml"
+    - Stack traces: only in debug mode (--debug flag)
+
+---
+
+MILESTONE 5 TOTAL: 19 story points
+
+================================================================================
+MILESTONE 6: DEPLOYMENT & DOCUMENTATION
+================================================================================
+
+STORY: M6.1 - Deployment Script [3 points]
+  Description: Global deployment via bin/deploy.sh
+
+  Tasks:
+    - Create bin/deploy.sh (similar to feat-py)
+    - Install to ~/.local/bin/snek/testrs
+    - Inject version from pyproject.toml
+    - Create symlinks if needed
+    - Add to PATH instructions
+
+  Requirements:
+    - Install location: ~/.local/bin/snek/testrs
+    - Version injection: read from pyproject.toml, inject into __version__
+    - Symlink: optional testrs symlink in ~/.local/bin/
+    - PATH: check if ~/.local/bin in PATH, warn if not
+
+  Success Criteria:
+    ✓ Deploys testrs globally
+    ✓ Version shows correctly
+    ✓ Works from any directory
+    ✓ PATH setup instructions clear
+
+  Hints:
+    - Copy deploy.sh pattern from feat-py
+    - Use sed to inject version: sed "s/__version__ = .*/__version__ = \"$VERSION\"/"
+    - Check PATH: echo $PATH | grep -q ~/.local/bin
+
+---
+
+STORY: M6.2 - Init Command [3 points]
+  Description: Initialize .spec.toml for new projects
+
+  Tasks:
+    - Add 'init' command to CLI
+    - Detect project language(s)
+    - Generate .spec.toml with defaults
+    - Create tests/ directory if missing
+    - Show next steps
+
+  Requirements:
+    - Auto-detect: Rust (Cargo.toml), Python (pyproject.toml), Node.js (package.json)
+    - Generate: .spec.toml with detected languages
+    - Defaults: sensible test patterns, exclusions per language
+    - Create: tests/ directory structure
+    - Output: next steps message
+
+  Success Criteria:
+    ✓ Detects languages correctly
+    ✓ Generates valid .spec.toml
+    ✓ Creates tests/ directory
+    ✓ Shows helpful next steps
+
+  Hints:
+    - Template .spec.toml per language
+    - Project name: from manifest or directory name
+    - Tests root: tests/ (create if missing)
+    - Next steps: "Run 'testrs lint' to check test organization"
+
+---
+
+STORY: M6.3 - Migration Guide [2 points]
+  Description: Guide for migrating RSB projects to testrs
+
+  Tasks:
+    - Write MIGRATION.md
+    - Document rsb test.sh → testrs migration
+    - Provide migration checklist
+    - Show examples for each project type
+
+  Requirements:
+    - Cover: projects with existing test.sh
+    - Steps: install testrs, init config, validate tests
+    - Checklist: pre-migration, migration, post-migration
+    - Examples: RSB project, Python project, Node.js project
+
+  Success Criteria:
+    ✓ Clear migration steps
+    ✓ Examples for each language
+    ✓ Checklist is comprehensive
+    ✓ Addresses common issues
+
+  Hints:
+    - Structure: Before, During, After sections
+    - Before: backup, understand current setup
+    - During: install, init, validate
+    - After: test, commit, remove old test.sh
+
+---
+
+STORY: M6.4 - Comprehensive README [3 points]
+  Description: Update README.md with full documentation
+
+  Tasks:
+    - Document all features
+    - Add usage examples for all 4 languages
+    - Document configuration options
+    - Add troubleshooting section
+
+  Requirements:
+    - Sections: Installation, Usage, Config, Languages, Commands, Troubleshooting
+    - Examples: Rust, Python, Node.js, Shell
+    - Config: full .spec.toml reference
+    - Commands: all commands with examples
+
+  Success Criteria:
+    ✓ Complete feature coverage
+    ✓ Examples for all languages
+    ✓ Config reference is clear
+    ✓ Troubleshooting covers common issues
+
+  Hints:
+    - Follow feat-py README structure
+    - Show .spec.toml examples per language
+    - Command examples: testrs run sanity, testrs lint, etc.
+    - Troubleshooting: "Tests not found", "Invalid config", etc.
+
+---
+
+STORY: M6.5 - Test Coverage for testrs Itself [5 points]
+  Description: Test suite for testrs tool
+
+  Tasks:
+    - Create tests/ for testrs itself
+    - Unit tests for core modules
+    - Integration tests for commands
+    - Test against sample projects
+    - Add CI via GitHub Actions
+
+  Requirements:
+    - Unit tests: config, discovery, validation, runner
+    - Integration: CLI commands with sample projects
+    - Sample projects: fixtures for Rust, Python, Node.js, Shell
+    - CI: run tests on push, test against Python 3.8-3.12
+
+  Success Criteria:
+    ✓ >80% code coverage
+    ✓ All commands tested
+    ✓ CI passes on all Python versions
+    ✓ Sample fixtures work correctly
+
+  Hints:
+    - Use pytest for testing
+    - Fixtures: tests/fixtures/rust-project/, python-project/, etc.
+    - Mock: subprocess calls for isolation
+    - CI: .github/workflows/test.yml
+
+---
+
+STORY: M6.6 - RSB Project Rollout [5 points]
+  Description: Deploy testrs to all 23 RSB projects
+
+  Tasks:
+    - Install testrs globally
+    - Migrate oodx-rsb first (canonical)
+    - Create .spec.toml for each project
+    - Validate test structure for each
+    - Update HANDOFF.md with progress
+
+  Requirements:
+    - Install: testrs to ~/.local/bin/snek/
+    - Migrate: prioritize high-priority projects first
+    - Validate: run testrs lint on each project
+    - Fix: violations before finalizing
+    - Document: update HANDOFF.md
+
+  Success Criteria:
+    ✓ testrs deployed globally
+    ✓ All 23 projects have .spec.toml
+    ✓ All projects pass testrs lint
+    ✓ HANDOFF.md updated
+
+  Hints:
+    - Start with oodx-rsb (reference)
+    - High priority: meteor-meteordb, skull-ignite, vizo-boxy, pronto-prontodb
+    - Create script: deploy_all.sh for batch operations
+    - Track progress in HANDOFF.md
+
+---
+
+MILESTONE 6 TOTAL: 21 story points
+
+================================================================================
+SUMMARY
+================================================================================
+
+Total Story Points: 133 points
+Estimated Timeline: 12 weeks (10-12 points per week)
+
+MILESTONE BREAKDOWN:
+  M1: Foundation & Infrastructure          - 16 points (Weeks 1-2)
+  M2: Rust Support                         - 28 points (Weeks 3-4)
+  M3: Multi-Language Discovery & Validation - 28 points (Weeks 5-6)
+  M4: Test Execution Engine                - 21 points (Weeks 7-8)
+  M5: Reporting & Polish                   - 19 points (Weeks 9-10)
+  M6: Deployment & Documentation           - 21 points (Weeks 11-12)
+
+LANGUAGE SUPPORT TIMELINE:
+  - Rust: Milestones 1-2 (Weeks 1-4) - Full support
+  - Python: Milestone 3 + M4.1 (Weeks 5-7) - Full support
+  - Node.js: Milestone 3 + M4.2 (Weeks 5-7) - Full support
+  - Shell: Milestone 3 + M4.3 (Weeks 5-7) - Full support
+
+RISK AREAS (Higher complexity):
+  - M2.3: Rust Test Validation (8 points) - Complex validation logic
+  - M3.x: Multi-language support (28 points) - 4 languages to support
+  - M4.4: Parallel Execution (5 points) - Concurrency challenges
+  - M4.5: Test Parsing (5 points) - Multiple output formats
+
+DEPENDENCIES:
+  - M2 depends on M1 (foundation required)
+  - M3 depends on M2 (Rust as reference implementation)
+  - M4 depends on M3 (discovery before execution)
+  - M5 depends on M4 (execution before reporting)
+  - M6 depends on M5 (polish before deployment)
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Review and approve this TASKS.txt
+2. Prioritize M1 tasks (foundation)
+3. Begin implementation with M1.1 (project structure)
+4. Track progress in this file (mark completed stories)
+5. Update HANDOFF.md after each milestone
+
+================================================================================
