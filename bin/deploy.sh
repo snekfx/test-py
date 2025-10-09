@@ -7,6 +7,13 @@ TARGET_BIN_DIR="$HOME/.local/bin"
 # Resolve repository root from bin/
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
+# Initialize pyenv if available
+if [ -d "$HOME/.pyenv" ]; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+fi
+
 # Extract version from pyproject.toml or default
 VERSION=$(grep -E "^version\s*=" "$ROOT_DIR/pyproject.toml" | head -1 | cut -d'"' -f2 2>/dev/null || echo "0.1.0-dev")
 
@@ -23,15 +30,20 @@ echo ""
 # Deploy testpy via pip
 echo "🧪 Deploying testpy tool..."
 
+# Display Python/pip info
+echo "🐍 Python: $(python --version 2>&1)"
+echo "📦 pip: $(pip --version | cut -d' ' -f1-2)"
+echo ""
+
 # Check if already installed
 if pip show testpy >/dev/null 2>&1; then
     echo "⚠️  testpy is already installed, uninstalling..."
-    pip uninstall -y testpy --break-system-packages
+    pip uninstall -y testpy
 fi
 
 # Install in editable mode
 echo "📦 Installing testpy in editable mode..."
-if ! pip install -e "$ROOT_DIR" --break-system-packages; then
+if ! pip install -e "$ROOT_DIR"; then
     echo "❌ Failed to install testpy"
     exit 1
 fi
