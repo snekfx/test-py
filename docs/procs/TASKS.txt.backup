@@ -1,0 +1,108 @@
+# test-py (testrs) Tasks
+
+## Project Setup
+[x] Create project structure
+[x] Create pyproject.toml for pip packaging
+[x] Create code_ref symlinks to canonical sources
+[x] Copy RSB reference documentation
+[x] Create CODE_REFERENCES.md (source hierarchy)
+[x] Create comprehensive README with warnings
+[x] Copy analysis reports from brain/rx
+[x] Create .gitignore
+[x] Initial git commit
+
+## Core Implementation
+[ ] Read and understand CODE_REFERENCES.md
+[ ] Study canonical oodx-rsb test.sh implementation
+[ ] Review RSB test patterns analysis
+[ ] Design Python module architecture
+[ ] Implement src/testrs/cli.py (main entry point)
+[ ] Implement src/testrs/config.py (configuration loader)
+[ ] Implement src/testrs/discovery.py (module/test discovery)
+[ ] Implement src/testrs/validator.py (MODULE_SPEC validation)
+[ ] Implement src/testrs/runner.py (test execution)
+[ ] Implement src/testrs/reporter.py (test reporting)
+
+## Validation Logic (from rsb_test.sh)
+[ ] Implement test naming pattern validation
+[ ] Implement required test category enforcement
+[ ] Implement sanity + UAT requirement per module
+[ ] Implement module exclusion patterns
+[ ] Implement category entry file validation
+[ ] Implement violation reporting
+[ ] Implement enforcement modes (strict, override, skip)
+
+## Test Execution
+[ ] Implement cargo test integration
+[ ] Implement timeout handling
+[ ] Implement category-based test execution
+[ ] Implement module-based test execution
+[ ] Implement adhoc test support
+[ ] Implement parallel test execution
+
+## MODULE_SPEC Integration
+[ ] Implement module discovery via src/*/mod.rs
+[ ] Implement MODULE_SPEC parsing
+[ ] Implement exclusion pattern support
+[ ] Implement feature detection
+
+## Documentation Integration
+[ ] Implement docs command (like test.sh docs)
+[ ] Support for showing test organization docs
+[ ] Support for showing MODULE_SPEC
+[ ] Support for showing feature docs
+[ ] Integration with feat.py for doc updates
+
+## Testing & Validation
+[ ] Test against oodx-rsb project (canonical)
+[ ] Validate all test organization rules work
+[ ] Verify enforcement modes function correctly
+[ ] Test with projects that have violations
+[ ] Cross-reference with shell implementation
+
+## Deployment
+[ ] Create deployment script (bin/deploy.sh)
+[ ] Test pip install -e .
+[ ] Verify testrs command works
+[ ] Test on multiple Rust projects
+
+## Rollout Strategy
+[ ] Phase 1: Test on oodx-rsb (canonical reference)
+[ ] Phase 2: Test on 2-3 pilot projects (meteor-meteordb, skull-ignite)
+[ ] Phase 3: Deploy to high-priority projects (4 projects)
+[ ] Phase 4: Deploy to medium-priority projects (8 projects)
+[ ] Phase 5: Create migration guide for remaining projects
+
+## Quality & Refinement
+[ ] Add comprehensive error messages
+[ ] Implement helpful violation explanations
+[ ] Add --help documentation
+[ ] Create user guide
+[ ] Add debug/verbose modes
+[ ] Performance optimization
+
+## Future Enhancements
+[ ] Beautiful output formatting (like boxy)
+[ ] Test coverage reporting
+[ ] Integration with CI/CD
+[ ] Support for other languages (Python, etc.)
+[ ] Configuration profiles
+[ ] Plugin system for custom validators
+
+## Documentation
+[ ] Create HOWTO_USE_TESTRS.md
+[ ] Create MIGRATION_GUIDE.md
+[ ] Document differences from shell version
+[ ] Create examples for each command
+[ ] Document configuration options
+
+## Critical Reminders
+⚠️ ALWAYS reference oodx-rsb test.sh as canonical source
+⚠️ DO NOT reference boxy-based test.sh files (unreliable)
+⚠️ BashFX testsh is architecture reference ONLY
+⚠️ See CODE_REFERENCES.md for source hierarchy
+
+---
+Last Updated: 2025-10-08
+Status: Project scaffolding complete, ready for implementation
+Priority: HIGH - Critical infrastructure for Rust project standardization
