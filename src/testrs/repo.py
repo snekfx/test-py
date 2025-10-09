@@ -216,6 +216,35 @@ def validate_language_requirements(repo_root: Path, language: str) -> List[str]:
     return errors
 
 
+def _load_toml_file(path: Path) -> Optional[dict]:
+    """
+    Load TOML file with library version handling.
+
+    Args:
+        path: Path to TOML file
+
+    Returns:
+        Parsed TOML data as dict, or None if file doesn't exist or can't be parsed
+    """
+    if not path.exists():
+        return None
+
+    try:
+        import sys
+        if sys.version_info >= (3, 11):
+            import tomllib
+        else:
+            try:
+                import tomli as tomllib
+            except ImportError:
+                return None
+
+        with open(path, "rb") as f:
+            return tomllib.load(f)
+    except Exception:
+        return None
+
+
 def get_manifest_project_name(repo_root: Path) -> Optional[str]:
     """
     Get project name from manifest files.
@@ -229,48 +258,18 @@ def get_manifest_project_name(repo_root: Path) -> Optional[str]:
         Project name if found, None otherwise
     """
     # Try Cargo.toml
-    cargo_toml = repo_root / "Cargo.toml"
-    if cargo_toml.exists():
-        try:
-            import sys
-            if sys.version_info >= (3, 11):
-                import tomllib
-            else:
-                try:
-                    import tomli as tomllib
-                except ImportError:
-                    tomllib = None
-
-            if tomllib:
-                with open(cargo_toml, "rb") as f:
-                    data = tomllib.load(f)
-                    package_name = data.get("package", {}).get("name")
-                    if package_name:
-                        return package_name
-        except Exception:
-            pass
+    cargo_data = _load_toml_file(repo_root / "Cargo.toml")
+    if cargo_data:
+        package_name = cargo_data.get("package", {}).get("name")
+        if package_name:
+            return package_name
 
     # Try pyproject.toml
-    pyproject_toml = repo_root / "pyproject.toml"
-    if pyproject_toml.exists():
-        try:
-            import sys
-            if sys.version_info >= (3, 11):
-                import tomllib
-            else:
-                try:
-                    import tomli as tomllib
-                except ImportError:
-                    tomllib = None
-
-            if tomllib:
-                with open(pyproject_toml, "rb") as f:
-                    data = tomllib.load(f)
-                    project_name = data.get("project", {}).get("name")
-                    if project_name:
-                        return project_name
-        except Exception:
-            pass
+    pyproject_data = _load_toml_file(repo_root / "pyproject.toml")
+    if pyproject_data:
+        project_name = pyproject_data.get("project", {}).get("name")
+        if project_name:
+            return project_name
 
     # Try package.json
     package_json = repo_root / "package.json"

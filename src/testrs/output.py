@@ -159,7 +159,7 @@ def boxy_display(
         return False
 
 
-def _plain_output(content: str, theme: str, title: Optional[str]):
+def _plain_output(content: str, theme: str, title: Optional[str]) -> None:
     """
     Plain text fallback output.
 
@@ -176,7 +176,7 @@ def _plain_output(content: str, theme: str, title: Optional[str]):
     print()  # Empty line after content
 
 
-def success(message: str, title: Optional[str] = None):
+def success(message: str, title: Optional[str] = None) -> None:
     """
     Display success message with green theme.
 
@@ -187,7 +187,7 @@ def success(message: str, title: Optional[str] = None):
     boxy_display(message, Theme.SUCCESS, title or "✓ Success")
 
 
-def warning(message: str, title: Optional[str] = None):
+def warning(message: str, title: Optional[str] = None) -> None:
     """
     Display warning message with yellow theme.
 
@@ -198,7 +198,7 @@ def warning(message: str, title: Optional[str] = None):
     boxy_display(message, Theme.WARNING, title or "⚠ Warning")
 
 
-def error(message: str, title: Optional[str] = None):
+def error(message: str, title: Optional[str] = None) -> None:
     """
     Display error message with red theme.
 
@@ -209,7 +209,7 @@ def error(message: str, title: Optional[str] = None):
     boxy_display(message, Theme.ERROR, title or "✗ Error")
 
 
-def info(message: str, title: Optional[str] = None):
+def info(message: str, title: Optional[str] = None) -> None:
     """
     Display informational message with blue theme.
 
@@ -220,7 +220,7 @@ def info(message: str, title: Optional[str] = None):
     boxy_display(message, Theme.INFO, title or "ℹ Info")
 
 
-def plain(message: str):
+def plain(message: str) -> None:
     """
     Display plain message without boxy (always to stdout).
 
@@ -230,7 +230,7 @@ def plain(message: str):
     print(message)
 
 
-def print_plain(message: str):
+def print_plain(message: str) -> None:
     """
     Print message to stdout in plain mode.
 
@@ -242,7 +242,7 @@ def print_plain(message: str):
     print(message)
 
 
-def print_error(message: str):
+def print_error(message: str) -> None:
     """
     Print error message to stderr.
 
@@ -252,7 +252,7 @@ def print_error(message: str):
     print(f"testrs: {message}", file=sys.stderr)
 
 
-def print_debug(message: str):
+def print_debug(message: str) -> None:
     """
     Print debug message to stderr if DEBUG mode enabled.
 
