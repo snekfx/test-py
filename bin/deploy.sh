@@ -26,12 +26,12 @@ echo "🧪 Deploying testpy tool..."
 # Check if already installed
 if pip show testpy >/dev/null 2>&1; then
     echo "⚠️  testpy is already installed, uninstalling..."
-    pip uninstall -y testpy
+    pip uninstall -y testpy --break-system-packages
 fi
 
 # Install in editable mode
 echo "📦 Installing testpy in editable mode..."
-if ! pip install -e "$ROOT_DIR"; then
+if ! pip install -e "$ROOT_DIR" --break-system-packages; then
     echo "❌ Failed to install testpy"
     exit 1
 fi
