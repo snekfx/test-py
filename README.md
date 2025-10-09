@@ -15,7 +15,23 @@ See [CODE_REFERENCES.md](docs/CODE_REFERENCES.md) for detailed source hierarchy 
 
 ## Status
 
-🚧 **In Development** - Setting up project structure and reference documentation
+✅ **Milestone 1 Complete** - Foundation & Infrastructure (16/16 points)
+✅ **Milestone 2 Complete** - Rust Support (28/28 points)
+
+**Current Progress:** 44/133 story points (33%)
+
+**Working Features:**
+- ✅ Multi-language configuration system (.spec.toml)
+- ✅ Repository detection and validation
+- ✅ Rust module discovery (MODULE_SPEC + legacy patterns)
+- ✅ Rust test discovery (3 RSB patterns: wrapper, directory, prefixed)
+- ✅ Rust test validation (6 violation types)
+- ✅ Rust test execution (cargo test with timeout)
+- ✅ Beautiful violation reports (boxy integration)
+- ✅ CLI with lint, run, check, violations commands
+- ✅ Override and enforcement modes
+
+**Next:** Milestone 3 - Multi-Language Support (deferred) or Milestone 5 - Reporting & Polish
 
 ## Goals
 
@@ -63,54 +79,109 @@ test-py/
 └── pyproject.toml       # Python package config
 ```
 
-## Installation (Future)
+## Installation
 
 ```bash
-# From this directory
+# Development install
+cd /home/xnull/repos/code/python/snekfx/test-py
 pip install -e .
 
-# Or use deploy script
-./bin/deploy.sh
+# Or use directly with PYTHONPATH
+export PYTHONPATH=/home/xnull/repos/code/python/snekfx/test-py/src
+python -m testrs --help
 ```
 
-## Usage (Planned)
+## Usage
 
 ```bash
-# Run all tests
-testrs
+# Check configuration
+testrs check
 
-# Run specific category
-testrs sanity
-testrs uat
+# Validate test organization (lint)
+testrs lint                    # Show summary
+testrs lint --violations       # Show detailed report
 
-# Run for specific module
-testrs sanity --module math
+# Run tests (validates first, then runs cargo test)
+testrs run                     # Run all tests
+testrs run sanity              # Run sanity category
+testrs run --module math       # Run specific module
 
-# Validate test organization
-testrs lint
+# Override validation (emergency bypass)
+testrs run --override          # Run despite violations
+testrs run --skip-enforcement  # Skip validation completely
 
-# Show violations
-testrs lint --violations
+# Options
+testrs --view=data             # Plain output (no boxy)
+testrs --timeout 300           # Custom timeout (seconds)
+testrs --help                  # Show all options
+```
+
+**Example Output:**
+
+```bash
+$ testrs lint
+⚠ Validation Failed
+Found 4 test organization violation(s):
+
+• Naming issues: 0
+• Missing sanity tests: 2
+• Missing UAT tests: 2
+• Missing category entries: 0
+• Unauthorized root files: 0
+• Invalid directories: 0
+
+Run 'testrs lint --violations' for detailed report
 ```
 
 ## Development
+
+### Architecture
+
+**Implemented Modules:**
+- `src/testrs/__init__.py` - Package initialization (46 LOC)
+- `src/testrs/__main__.py` - Module entry point (29 LOC)
+- `src/testrs/config.py` - Multi-language configuration (351 LOC)
+- `src/testrs/repo.py` - Repository detection (288 LOC)
+- `src/testrs/output.py` - Boxy integration (264 LOC)
+- `src/testrs/cli.py` - CLI interface (383 LOC)
+- `src/testrs/discovery.py` - Module/test discovery (307 LOC)
+- `src/testrs/validator.py` - Test validation (352 LOC)
+- `src/testrs/runner.py` - Test execution (220 LOC)
+
+**Total:** ~2,240 lines of production Python
 
 ### Reference Documentation
 
 **Start here:** [CODE_REFERENCES.md](docs/CODE_REFERENCES.md)
 
 **Key documents:**
-- `docs/ref/rsb_test_patterns_analysis.md` - Line-by-line analysis of canonical implementation
+- `TASKS.txt` - Complete implementation roadmap (133 story points)
+- `CONTINUE.md` - Session continuation guide (M2 complete)
+- `docs/procs/M2_REVIEW_REPORT.md` - Code review (Grade A-)
+- `docs/ref/rsb_test_patterns_analysis.md` - Canonical logic analysis
 - `docs/ref/MODULE_SPEC.md` - RSB module organization spec
-- `docs/rust_test_standardization_plan.md` - Standardization strategy
 
-### Implementation Priority
+### Testing
 
-1. Read and understand `docs/CODE_REFERENCES.md`
-2. Study `code_ref/rsb_test.sh` (canonical reference)
-3. Review `docs/ref/rsb_test_patterns_analysis.md` (documented logic)
-4. Implement core modules based on canonical patterns
-5. Test against oodx-rsb project
+```bash
+# Test on RSB project (canonical reference)
+cd /home/xnull/repos/code/rust/prods/oodx/rsb
+PYTHONPATH=/home/xnull/repos/code/python/snekfx/test-py/src python -m testrs lint
+
+# Expected results:
+# - 24 modules discovered
+# - 96 test files discovered
+# - 4 violations (deps, xcls missing sanity/UAT tests)
+```
+
+### Code Quality
+
+**Repairman Review:** Grade A- (93/100)
+- Type hints: 100% coverage
+- Python 3.8 compatible
+- No security vulnerabilities
+- Comprehensive error handling
+- Production-ready
 
 ## Contributing
 
