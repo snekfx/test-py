@@ -204,27 +204,41 @@ def load_config(repo_root: Path) -> Optional[Config]:
     with open(spec_path, "rb") as f:
         data = tomllib.load(f)
 
+    # Check for [tests] section (new format)
+    # Fallback to top-level config (legacy format)
+    tests_section = data.get("tests", {})
+
     # Extract main config
+    # Priority: [tests] section > top-level (for backward compatibility)
     config = Config(
         project_name=data.get("project_name"),
         languages=data.get("languages", ["rust"]),
-        test_root=data.get("test_root", "tests"),
+        test_root=tests_section.get("test_root", data.get("test_root", "tests")),
         features_root=data.get("features_root", "src"),
-        exclude=data.get("exclude", []),
+        exclude=tests_section.get("exclude", data.get("exclude", [])),
         source_file=spec_path,
     )
 
     # Load language-specific sections
-    if "rust" in data:
+    # Priority: [tests.rust] > [rust] (backward compatibility)
+    if "rust" in tests_section:
+        config.rust = _load_lang_config(tests_section["rust"])
+    elif "rust" in data:
         config.rust = _load_lang_config(data["rust"])
 
-    if "python" in data:
+    if "python" in tests_section:
+        config.python = _load_lang_config(tests_section["python"])
+    elif "python" in data:
         config.python = _load_lang_config(data["python"])
 
-    if "nodejs" in data:
+    if "nodejs" in tests_section:
+        config.nodejs = _load_lang_config(tests_section["nodejs"])
+    elif "nodejs" in data:
         config.nodejs = _load_lang_config(data["nodejs"])
 
-    if "shell" in data:
+    if "shell" in tests_section:
+        config.shell = _load_lang_config(tests_section["shell"])
+    elif "shell" in data:
         config.shell = _load_lang_config(data["shell"])
 
     # Apply defaults after loading

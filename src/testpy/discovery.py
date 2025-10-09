@@ -87,29 +87,30 @@ def discover_rust_modules(repo_root: Path, config: Config) -> List[Module]:
             )
         )
 
-    # Pattern 2: src/module.rs (legacy, optional - not in exclusions)
-    # Only if explicitly enabled or found in older projects
-    for module_rs in src_dir.glob("*.rs"):
-        module_name = module_rs.stem
-
-        # Skip lib.rs and main.rs (always excluded)
-        if module_name in ["lib", "main"]:
-            continue
-
-        # Apply exclusion patterns
-        if _is_excluded(module_name, exclusions):
-            continue
-
-        # Only add if not already found as mod.rs
-        if not any(m.name == module_name for m in modules):
-            modules.append(
-                Module(
-                    name=module_name,
-                    path=module_rs,
-                    language="rust",
-                    is_public=_check_rust_public(module_rs),
-                )
-            )
+    # Pattern 2: src/module.rs (legacy pattern)
+    # DISABLED during MODULE_SPEC migration - matches RSB test.sh behavior
+    # TODO: Re-enable once legacy .rs files are migrated to MODULE_SPEC
+    # for module_rs in src_dir.glob("*.rs"):
+    #     module_name = module_rs.stem
+    #
+    #     # Skip lib.rs and main.rs (always excluded)
+    #     if module_name in ["lib", "main"]:
+    #         continue
+    #
+    #     # Apply exclusion patterns
+    #     if _is_excluded(module_name, exclusions):
+    #         continue
+    #
+    #     # Only add if not already found as mod.rs
+    #     if not any(m.name == module_name for m in modules):
+    #         modules.append(
+    #             Module(
+    #                 name=module_name,
+    #                 path=module_rs,
+    #                 language="rust",
+    #                 is_public=_check_rust_public(module_rs),
+    #             )
+    #         )
 
     return sorted(modules, key=lambda m: m.name)
 
