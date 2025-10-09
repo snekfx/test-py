@@ -78,15 +78,19 @@ MILESTONE 3: Multi-Language Discovery & Validation [WEEKS 5-6]
   Module discovery and test validation for Python/Node.js/Shell
   Success: Can discover modules and validate structure for all languages
 
-MILESTONE 4: Test Execution Engine [WEEKS 7-8]
+MILESTONE 4: Documentation & Testing UX [WEEKS 7-8] 🆕
+  Rust testing documentation, ceremony support, visual UX guidance
+  Success: Universal testing docs synced to brain, ceremony tests supported
+
+MILESTONE 5: Test Execution Engine [WEEKS 9-10]
   Test runners for all languages with timeout and parallel support
   Success: Can execute tests across all language ecosystems
 
-MILESTONE 5: Reporting & Polish [WEEKS 9-10]
+MILESTONE 6: Reporting & Polish [WEEKS 11-13]
   Beautiful reporting, boxy integration, CI/CD optimizations
   Success: Production-ready tool with comprehensive reporting
 
-MILESTONE 6: Deployment & Documentation [WEEKS 11-12]
+MILESTONE 7: Deployment & Documentation [WEEKS 14-15]
   Global deployment, migration guides, comprehensive docs
   Success: Tool deployed globally, 23 Rust projects aligned
 
@@ -658,7 +662,242 @@ STORY: M3.8 - Shell Script Validation [3 points]
 MILESTONE 3 TOTAL: 28 story points
 
 ================================================================================
-MILESTONE 4: TEST EXECUTION ENGINE
+MILESTONE 4: DOCUMENTATION & TESTING UX 🆕
+================================================================================
+
+Reference: TEST_UX_UPDATE.md (comprehensive planning document)
+
+STORY: M4.1 - Create Rust Test Organization Documentation [5 points]
+  Description: Adapt RSB TEST_ORGANIZATION.md for universal Rust testing
+
+  Tasks:
+  □ Adapt TEST_ORGANIZATION.md → docs/rust/RUST_TEST_ORGANIZATION.md
+    - Remove RSB-specific references
+    - Replace test.sh commands with testpy commands
+    - Generalize for any Rust project using RSB patterns
+    - Keep all structure/pattern definitions
+    - Add ceremony tests section (optional)
+
+  Acceptance Criteria:
+  - Universal Rust test organization standard (363 lines adapted)
+  - Test categories documented (9 standard + ceremony optional)
+  - Naming patterns explained
+  - Required tests per module (sanity + UAT)
+  - 6 violation types documented
+  - Ceremony test structure explained
+
+  Story Points: 5 (medium complexity, requires RSB→generic adaptation)
+
+
+STORY: M4.2 - Create Rust Testing HOWTO Guide [5 points]
+  Description: Adapt RSB HOWTO_TEST.md with testpy commands
+
+  Tasks:
+  □ Adapt HOWTO_TEST.md → docs/rust/RUST_TESTING_HOWTO.md
+    - Replace ./bin/test.sh with testpy commands
+    - Update command examples throughout
+    - Keep examples and best practices
+    - Add ceremony command section
+    - Update Quick Start guide
+
+  Acceptance Criteria:
+  - Complete testing guide (766 lines adapted)
+  - All testpy commands documented
+  - Module-based testing explained
+  - Category explanations included
+  - Test writing examples provided
+  - Ceremony tests documented
+
+  Story Points: 5 (medium complexity, command replacement + content updates)
+
+
+STORY: M4.3 - Create Visual Testing UX Documentation [3 points]
+  Description: Extract visual UX principles from architecture docs
+
+  Tasks:
+  □ Create docs/rust/RUST_TESTING_UX.md from:
+    - BASHFX-v3.md section 4.5 (Visual Friendliness, lines 790-820)
+    - RSB_ARCH.md section 4.2 (Test Runner and Ceremony, lines 623-667)
+    - HOWTO_UPDATE_RSB.md Chapter 6.2 (Test Ceremony Commands)
+
+  Content Sections:
+  □ Visual Friendliness Principles
+  □ UAT Visual Requirements (hypothesis → expectation → result)
+  □ Test Output Structure (numbered, titled, STATUS messages)
+  □ Glyphs and Colors (✓, ✗, ⚠, ℹ)
+  □ Formatting Techniques (box drawing, indentation, spacing)
+  □ Summary Ceremonies (metrics, timing, failed tests)
+  □ Tool Integration (reference to RUST_BOXY_ROLO_USAGE.md)
+  □ Examples (simple UAT, enhanced UAT, ceremony)
+
+  Acceptance Criteria:
+  - Visual UX principles documented (NOT ceremony-specific)
+  - UAT requirements clearly explained
+  - Simple println formatting is sufficient
+  - Cross-reference to boxy/rolo doc
+  - Example UAT test patterns provided
+
+  Story Points: 3 (lower complexity, extraction + organization)
+
+
+STORY: M4.4 - Create Boxy/Rolo Usage Documentation [3 points]
+  Description: Document boxy and rolo integration for enhanced testing
+
+  Tasks:
+  □ Create docs/rust/RUST_BOXY_ROLO_USAGE.md with:
+    - Boxy v0.23.0 usage patterns
+    - Rolo v0.2 usage patterns (NOTE: docs being cleaned up)
+    - Combined ceremony patterns
+    - Real examples from boxy/tests/ceremonies/
+
+  Content Sections:
+  □ Tool Overview (versions, API reference commands)
+  □ When to Use These Tools (ceremonies, not required for UAT)
+  □ Boxy Basics (themes, title/status/footer, layout)
+  □ Boxy Advanced (param streams, progressive disclosure)
+  □ Rolo Basics (table/column mode, with cleanup note)
+  □ Combined Patterns (table in box, multi-step ceremony)
+  □ Ceremony Script Templates
+  □ Real Examples (from boxy upstream)
+  □ Cross-References (to RUST_TESTING_UX.md)
+
+  Acceptance Criteria:
+  - Boxy usage documented with examples
+  - Rolo usage documented with cleanup warning
+  - Combined patterns demonstrated
+  - Ceremony templates provided
+  - Cross-references included
+
+  Story Points: 3 (lower complexity, tool documentation)
+
+
+STORY: M4.5 - Implement docs Command [5 points]
+  Description: Add CLI command to display testing documentation
+
+  Tasks:
+  □ Add docs subcommand to cli.py
+  □ Implement doc path resolution (docs/rust/*.md)
+  □ Add boxy-themed doc display with fallback
+  □ Support doc aliases:
+    - rust-lint (or rust-org) → RUST_TEST_ORGANIZATION.md
+    - rust-howto → RUST_TESTING_HOWTO.md
+    - rust-ux → RUST_TESTING_UX.md
+    - rust-boxy (or rust-tools) → RUST_BOXY_ROLO_USAGE.md
+
+  Implementation:
+  □ cmd_docs(args, config, repo) function
+  □ Doc resolver with pattern matching
+  □ Boxy display with title formatting
+  □ Plain output mode (--view=data)
+  □ Error handling for missing docs
+
+  Acceptance Criteria:
+  - testpy docs rust-lint displays RUST_TEST_ORGANIZATION.md
+  - testpy docs rust-howto displays RUST_TESTING_HOWTO.md
+  - testpy docs rust-ux displays RUST_TESTING_UX.md
+  - testpy docs rust-boxy displays RUST_BOXY_ROLO_USAGE.md
+  - Boxy theming with graceful fallback
+  - Plain mode works (--view=data)
+
+  Story Points: 5 (medium complexity, CLI + display logic)
+
+
+STORY: M4.6 - Implement sync Command [5 points]
+  Description: Sync universal testing docs to brain registry
+
+  Tasks:
+  □ Implement sync_to_brain() function
+  □ Target directory: ~/repos/docs/brain/dev/procs/testing/rust/
+  □ Copy all docs/rust/*.md files
+  □ Create target directories if needed
+  □ Report sync status (files copied)
+
+  Implementation:
+  □ cmd_sync(args, config, repo) function
+  □ Brain path detection/creation
+  □ File copying with shutil.copy2
+  □ Summary output with boxy formatting
+
+  Acceptance Criteria:
+  - testpy sync copies docs/rust/*.md to brain
+  - Target: ~/repos/docs/brain/dev/procs/testing/rust/
+  - Creates directories if needed
+  - Reports files synced
+  - Graceful error handling
+
+  Story Points: 5 (medium complexity, file operations + path handling)
+
+
+STORY: M4.7 - Implement Ceremony Support [8 points]
+  Description: Add ceremony test discovery and execution
+
+  Tasks:
+  □ Implement ceremony discovery:
+    - Find tests/ceremonies/ceremony_*.{sh,rs,py}
+    - Extract <name> from ceremony_<name>.*
+    - Return flat list of ceremony names
+
+  □ Add ceremony CLI commands:
+    - testpy ceremony (alias for list)
+    - testpy ceremony list
+    - testpy ceremony run <name>
+    - testpy ceremony run all
+
+  □ Implement ceremony execution:
+    - Shell scripts: subprocess with bash
+    - Rust files: cargo test with filter
+    - Python files: pytest with filter
+    - Capture output and report results
+
+  □ Update validator:
+    - Ignore tests/ceremonies/ directory
+    - No enforcement for ceremonies
+    - Optional pattern validation if present
+
+  Implementation:
+  □ discover_ceremonies() in discovery.py
+  □ cmd_ceremony() in cli.py
+  □ execute_ceremony() in runner.py (new function)
+  □ Update validator to ignore ceremonies/
+
+  Acceptance Criteria:
+  - testpy ceremony list shows all ceremonies
+  - testpy ceremony run <name> executes ceremony
+  - Shell scripts execute via bash
+  - Rust/Python ceremonies execute via test runners
+  - Validator ignores ceremonies directory
+  - No enforcement (optional tests)
+
+  Story Points: 8 (higher complexity, multi-language execution)
+
+
+STORY: M4.8 - Testing and Documentation [5 points]
+  Description: Test M4 features and update project docs
+
+  Tasks:
+  □ Test docs command on RSB project
+  □ Test sync command (verify brain sync)
+  □ Test ceremony discovery and execution
+  □ Update testpy README.md:
+    - Add docs command section
+    - Add ceremony command section
+    - Add brain sync information
+  □ Create usage examples in README
+  □ Update CONTINUE.md with M4 status
+
+  Acceptance Criteria:
+  - All M4 features tested on RSB
+  - README updated with new commands
+  - CONTINUE.md reflects M4 completion
+  - Usage examples provided
+
+  Story Points: 5 (testing + documentation)
+
+
+MILESTONE 4 TOTAL: 44 story points
+
+================================================================================
+MILESTONE 5: TEST EXECUTION ENGINE
 ================================================================================
 
 STORY: M4.1 - Python Test Runner [3 points]
@@ -1217,35 +1456,38 @@ MILESTONE 6 TOTAL: 21 story points
 SUMMARY
 ================================================================================
 
-Total Story Points: 133 points
-Estimated Timeline: 12 weeks (10-12 points per week)
+Total Story Points: 177 points (was 133 + 44 for M4)
+Estimated Timeline: 15 weeks (10-12 points per week)
 
 MILESTONE BREAKDOWN:
-  M1: Foundation & Infrastructure          - 16 points (Weeks 1-2)
-  M2: Rust Support                         - 28 points (Weeks 3-4)
+  M1: Foundation & Infrastructure           - 16 points (Weeks 1-2) ✅ COMPLETE
+  M2: Rust Support                          - 28 points (Weeks 3-4) ✅ COMPLETE
   M3: Multi-Language Discovery & Validation - 28 points (Weeks 5-6)
-  M4: Test Execution Engine                - 21 points (Weeks 7-8)
-  M5: Reporting & Polish                   - 19 points (Weeks 9-10)
-  M6: Deployment & Documentation           - 21 points (Weeks 11-12)
+  M4: Documentation & Testing UX            - 44 points (Weeks 7-8) 🆕
+  M5: Test Execution Engine                 - 21 points (Weeks 9-10)
+  M6: Reporting & Polish                    - 19 points (Weeks 11-13)
+  M7: Deployment & Documentation            - 21 points (Weeks 14-15)
 
 LANGUAGE SUPPORT TIMELINE:
-  - Rust: Milestones 1-2 (Weeks 1-4) - Full support
-  - Python: Milestone 3 + M4.1 (Weeks 5-7) - Full support
-  - Node.js: Milestone 3 + M4.2 (Weeks 5-7) - Full support
-  - Shell: Milestone 3 + M4.3 (Weeks 5-7) - Full support
+  - Rust: Milestones 1-2 (Weeks 1-4) - Full support ✅
+  - Python: Milestone 3 + M5.1 (Weeks 5-9) - Full support
+  - Node.js: Milestone 3 + M5.2 (Weeks 5-9) - Full support
+  - Shell: Milestone 3 + M5.3 (Weeks 5-9) - Full support
 
 RISK AREAS (Higher complexity):
-  - M2.3: Rust Test Validation (8 points) - Complex validation logic
+  - M2.3: Rust Test Validation (8 points) - Complex validation logic ✅ DONE
   - M3.x: Multi-language support (28 points) - 4 languages to support
-  - M4.4: Parallel Execution (5 points) - Concurrency challenges
-  - M4.5: Test Parsing (5 points) - Multiple output formats
+  - M4.7: Ceremony multi-language execution (8 points) - Shell/Rust/Python support
+  - M5.4: Parallel Execution (5 points) - Concurrency challenges
+  - M5.5: Test Parsing (5 points) - Multiple output formats
 
 DEPENDENCIES:
-  - M2 depends on M1 (foundation required)
+  - M2 depends on M1 (foundation required) ✅
   - M3 depends on M2 (Rust as reference implementation)
-  - M4 depends on M3 (discovery before execution)
-  - M5 depends on M4 (execution before reporting)
-  - M6 depends on M5 (polish before deployment)
+  - M4 can run parallel to M3 (documentation independent)
+  - M5 depends on M3 (discovery before execution)
+  - M6 depends on M5 (execution before reporting)
+  - M7 depends on M6 (polish before deployment)
 
 ================================================================================
 NEXT STEPS
